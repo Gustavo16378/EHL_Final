@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 8% 13%;           /* Asfalto escuro: #202124 */
+    --foreground: 0 0% 97%;             /* Branco puro: #f7f7f7 */
+    --card: 220 10% 17%;                /* Cinza levemente mais claro */
+    --card-foreground: 0 0% 97%;
+
+    --primary: 46 98% 53%;              /* Amarelo faixa: #FFD000 */
+    --primary-foreground: 220 10% 17%;  /* Texto escuro em bg amarelo */
+
+    --secondary: 222 47% 25%;           /* Azul EHL pro header/nav: #2b4162 */
+    --secondary-foreground: 0 0% 97%;
+
+    --muted: 220 5% 25%;                /* Cinza médio */
+    --muted-foreground: 0 0% 70%;       /* Prata */
+
+    --accent: 355 80% 48%;              /* Vermelho EHL */
+    --accent-foreground: 0 0% 100%;
+
+    --border: 220 10% 17%;              /* Mesma do card */
+    --input: 220 10% 17%;
+    --ring: 46 98% 53%;                 /* Anel de foco em amarelo carteira */
+    --radius: 0.5rem;
+  }
+}
+
+@layer utilities {
+  .text-silver {
+    @apply text-[#b3b3b3];
+  }
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+  .animation-delay-600 {
+    animation-delay: 600ms;
+  }
+  .animation-delay-800 {
+    animation-delay: 800ms;
+  }
+  .gradient-red-line {
+    @apply bg-gradient-to-r from-primary to-transparent;
+  }
+}
