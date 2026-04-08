@@ -1,4 +1,5 @@
-import i18n from 'i18next';
+import { Title } from '@radix-ui/react-dialog';
+import i18n, { t } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 const resources = {
@@ -7,6 +8,8 @@ const resources = {
       header: {
         home: "Início",
         company: "Empresa",
+        equipments: "Equipamentos",
+        constructions: "Obras",
         infrastructure: "Infraestrutura",
         portfolio: "Portfólio",
         contact: "Contato",
@@ -18,34 +21,130 @@ const resources = {
         subtitle: "Construindo o futuro da infraestrutura em todo o Brasil desde 1998. Especializados em rodovias, desenvolvimento urbano e grandes obras públicas.",
         discover: "Descubra Mais",
         portfolio: "Nosso Portfólio",
-        scroll: "Role para descobrir"
+        iso: "ISO 9001:2015 Certificado",
+        pbqp: "PBQP do Habitat — Nível A",
       },
       company: {
         title1: "História &",
         title2: "Qualidade",
         p1: "Fundada em 1998, a EHL — Eletro Hidro Ltda. é referência em engenharia pesada e infraestrutura no Brasil. Atuamos em rodovias, desenvolvimento urbano e grandes obras públicas com excelência técnica e compromisso com a qualidade.",
         p2: "Nossa equipe multidisciplinar de engenheiros e especialistas entrega soluções de classe mundial que resistem ao tempo. Nosso legado é construído sobre confiança, excelência técnica e busca constante pela inovação.",
+        iso: "ISO 9001:2015 — Sistema de Gestão da Qualidade",
+        pbqp: "PBQP do Habitat — Nível A",
+        licensing: "Licenciamento Ambiental Completo",
+        safety: "Segurança do Trabalho — NR-18 Compliance",
         years: "Anos de Experiência",
         delivered: "Obras Entregues",
         level: "Nível A",
         collaborators: "Colaboradores"
       },
-      infrastructure: {
-        title1: "Infraestrutura &",
-        title2: "Capacidades",
-        subtitle: "Soluções completas em engenharia pesada e infraestrutura para projetos de qualquer escala.",
-        paving: "Pavimentação Rodoviária",
-        pavingDesc: "Execução de obras em rodovias federais e estaduais — terraplenagem, drenagem e pavimentação asfáltica.",
-        urban: "Desenvolvimento Urbano",
-        urbanDesc: "Loteamentos, infraestrutura urbana e obras de saneamento em grandes empreendimentos.",
-        drainage: "Galerias Pluviais",
-        drainageDesc: "Construção de galerias de águas pluviais e sistemas de drenagem para mobilidade urbana.",
-        publicWorks: "Obras Públicas",
-        publicWorksDesc: "Execução de grandes obras públicas com certificação PBQP-H e ISO 9001.",
-        earthwork: "Terraplenagem",
-        earthworkDesc: "Movimentação de terra em larga escala para obras de infraestrutura e mineração.",
-        structures: "Obras de Arte Especiais",
-        structuresDesc: "Pontes, viadutos e estruturas de contenção com engenharia de alta complexidade."
+
+      equipments: {
+        title: "Nossos Equipamentos",
+        subtitle: "Frota própria de máquinas pesadas e equipamentos de última geração para atender obras de qualquer porte e complexidade.",
+        1: {
+          title: "Escavadeiras Hidráulicas",
+          description: "Máquinas de alta performance para escavação de valas, fundações e movimentação de terra em grandes volumes. Frota com modelos de 20 a 50 toneladas.",
+          amount: "12 unidades",
+          category: "Escavação"
+
+        },
+        2: {
+          title: "Caminhões Basculantes",
+          description: "Frota de caminhões caçamba para transporte de terra, brita e materiais de construção. Capacidades de 14 m³ a 25 m³.",
+          amount: "28 unidades",
+          category: "Transporte"
+
+        },
+        3: {
+          title: "Pavimentadoras de Asfalto",
+          description: "Equipamentos de última geração para aplicação de massa asfáltica com controle eletrônico de espessura e nivelamento automático.",
+          amount: "4 unidades",
+          category: "Pavimentação"
+        },
+        4: {
+          title: "Motoniveladoras",
+          description: "Máquinas para nivelamento e regularização de terrenos, preparo de sub-base e manutenção de estradas não pavimentadas.",
+          amount: "6 unidades",
+          category: "Terraplenagem"
+        },
+        5: {
+          title: "Pás Carregadeiras",
+          description: "Equipamentos versáteis para carga, descarga e movimentação de materiais em obras de infraestrutura e mineração.",
+          amount: "8 unidades",
+          category: "Movimentação"
+        },
+        6: {
+          title: "Rolos Compactadores",
+          description: "Rolos vibratórios para compactação de aterros, sub-base e camadas asfálticas, garantindo a densidade especificada em projeto.",
+          amount: "10 unidades",
+          category: "Compactação"
+        }
+      },
+      constructions: {
+        title1: "Obras",
+        title2: " em Andamento",
+        subtitle: "Acompanhe os projetos que a EHL está executando neste momento — engenharia pesada com excelência em todo o Brasil.",
+        1: {
+          title: "Duplicação da BR-040 — Trecho Cristalina/GO",
+          city: "Cristalina",
+          uf: "GO",
+          client: "DNIT",
+          status: "Em andamento",
+          deliveryForecast: "Dez/2025",
+          description: "Duplicação, terraplenagem e pavimentação asfáltica de 42 km em rodovia federal.",
+          type: "Pavimentação Rodoviária"
+        },
+        2: {
+          title: "Infraestrutura Urbana — Loteamento Parque das Águas",
+          city: "Uberlândia",
+          uf: "MG",
+          client: "Construtora Ápia",
+          status: "Em andamento",
+          deliveryForecast: "Mar/2026",
+          description: "Rede de drenagem, galerias pluviais, pavimentação e sinalização de loteamento com 1.200 lotes.",
+          type: "Desenvolvimento Urbano"
+        },
+        3: {
+          title: "Ponte sobre o Rio Paranaíba — MS-395",
+          city: "Paranaíba",
+          uf: "MS",
+          client: "Governo do Estado de MS",
+          status: "Em andamento",
+          deliveryForecast: "Jun/2026",
+          description: "Construção de ponte em concreto protendido com 180 m de extensão e acessos rodoviários.",
+          type: "Obras de Arte Especiais"
+        },
+        4: {
+          title: "Sistema de Drenagem — Av. Brasil, Anápolis",
+          city: "Anápolis",
+          uf: "GO",
+          client: "Prefeitura de Anápolis",
+          status: "Em andamento",
+          deliveryForecast: "Set/2025",
+          description: "Implantação de galerias de águas pluviais e recapeamento asfáltico em 8 km de avenida.",
+          type: "Galerias Pluviais"
+        },
+        5: {
+          title: "Terraplenagem — Complexo Logístico Triângulo",
+          city: "Uberaba",
+          uf: "MG",
+          client: "Log Commercial Properties",
+          status: "Em andamento",
+          deliveryForecast: "Nov/2025",
+          description: "Movimentação de 450.000 m³ de terra para plataforma industrial e acessos viários.",
+          type: "Terraplenagem"
+        },
+        6: {
+          title: "Restauração da GO-060 — Trecho Goiânia/Trindade",
+          city: "Goiânia",
+          uf: "GO",
+          client: "AGETOP",
+          status: "Em andamento",
+          deliveryForecast: "Fev/2026",
+          description: "Fresagem, recapeamento e sinalização horizontal/vertical em 25 km de rodovia estadual.",
+          type: "Pavimentação Rodoviária"
+        }
       },
       portfolio: {
         title1: "Projetos em",
@@ -91,6 +190,8 @@ const resources = {
       header: {
         home: "Home",
         company: "Company",
+        equipments: "Equipments",
+        constructions: "Constructions",
         infrastructure: "Infrastructure",
         portfolio: "Portfolio",
         contact: "Contact",
@@ -102,35 +203,66 @@ const resources = {
         subtitle: "Building the future of infrastructure across Brazil since 1998. Specialized in highways, urban development, and massive public works.",
         discover: "Discover More",
         portfolio: "Our Portfolio",
-        scroll: "Scroll to discover"
+        iso: "ISO 9001:2015 Certified",
+        pbqp: "PBQP do Habitat — Level A"
+
       },
       company: {
         title1: "Heritage &",
         title2: "Quality",
         p1: "Founded in 1998, EHL — Eletro Hidro Ltda. is a benchmark in heavy engineering and infrastructure in Brazil. We operate in highways, urban development, and major public works with technical excellence and commitment to quality.",
         p2: "Our multidisciplinary team of engineers and specialists delivers world-class solutions that stand the test of time. Our legacy is built on trust, technical excellence, and a constant search for innovation.",
+        iso: "ISO 9001:2015 — Quality Management System",
+        pbqp: "PBQP do Habitat — Level A",
+        licensing: "Comprehensive Environmental Licensing",
+        safety: "Occupational Safety — NR-18 Compliance",
         years: "Years of Experience",
         delivered: "Projects Delivered",
         level: "Level A",
         collaborators: "Collaborators"
       },
-      infrastructure: {
-        title1: "Infrastructure &",
-        title2: "Capabilities",
-        subtitle: "Complete solutions in heavy engineering and infrastructure for projects of any scale.",
-        paving: "Highway Paving",
-        pavingDesc: "Execution of works on federal and state highways — earthworks, drainage, and asphalt paving.",
-        urban: "Urban Development",
-        urbanDesc: "Subdivisions, urban infrastructure, and sanitation works in large developments.",
-        drainage: "Storm Sewers",
-        drainageDesc: "Construction of storm sewers and drainage systems for urban mobility.",
-        publicWorks: "Public Works",
-        publicWorksDesc: "Execution of major public works with PBQP-H and ISO 9001 certification.",
-        earthwork: "Earthworks",
-        earthworkDesc: "Large-scale earthmoving for infrastructure and mining works.",
-        structures: "Special Structures",
-        structuresDesc: "Bridges, viaducts, and containment structures with highly complex engineering."
+
+      equipments: {
+        title: "Our Equipment",
+        subtitle: "In-house fleet of heavy machinery and state-of-the-art equipment to serve projects of any size and complexity.",
+        1: {
+          title: "Escavadeiras",
+          description: "Máquinas de alta performance para escavação de valas, fundações e movimentação de terra em grandes volumes. Frota com modelos de 20 a 50 toneladas.",
+          amount: "12 unidades",
+          category: "Escavação"
+        },
+        2: {
+          title: "Caminhões Basculantes",
+          description: "Frota de caminhões caçamba para transporte de terra, brita e materiais de construção. Capacidades de 14 m³ a 25 m³.",
+          amount: "28 unidades",
+          category: "Transporte"
+        },
+        3: {
+          title: "Pavimentadoras de Asfalto",
+          description: "Equipamentos de última geração para aplicação de massa asfáltica com controle eletrônico de espessura e nivelamento automático.",
+          amount: "4 unidades",
+          category: "Pavimentação"
+        },
+        4: {
+          title: "Motoniveladoras",
+          description: "Máquinas para nivelamento e regularização de terrenos, preparo de sub-base e manutenção de estradas não pavimentadas.",
+          amount: "6 unidades",
+          category: "Terraplenagem"
+        },
+        5: {
+          title: "Pás Carregadeiras",
+          description: "Equipamentos versáteis para carga, descarga e movimentação de materiais em obras de infraestrutura e mineração.",
+          amount: "8 unidades",
+          category: "Movimentação"
+        },
+        6: {
+          title: "Rolos Compactadores",
+          description: "Rolos vibratórios para compactação de aterros, sub-base e camadas asfálticas, garantindo a densidade especificada em projeto.",
+          amount: "10 unidades",
+          category: "Compactação"
+        }
       },
+
       portfolio: {
         title1: "Featured",
         title2: "Projects",
@@ -175,6 +307,8 @@ const resources = {
       header: {
         home: "Inicio",
         company: "Empresa",
+        equipments: "Equipos",
+        constructions: "Obras",
         infrastructure: "Infraestructura",
         portfolio: "Portafolio",
         contact: "Contacto",
@@ -186,19 +320,25 @@ const resources = {
         subtitle: "Construyendo el futuro de la infraestructura en todo Brasil desde 1998. Especializados en carreteras, desarrollo urbano y grandes obras públicas.",
         discover: "Descubre Más",
         portfolio: "Nuestro Portafolio",
-        scroll: "Desplázate para descubrir"
+        iso: "ISO 9001:2015 Certificado",
+        pbqp: "PBQP do Habitat — Nivel A"
+
       },
       company: {
         title1: "Historia &",
         title2: "Calidad",
         p1: "Fundada en 1998, EHL — Eletro Hidro Ltda. es un referente en ingeniería pesada e infraestructura en Brasil. Operamos en carreteras, desarrollo urbano y grandes obras públicas con excelencia técnica y compromiso con la calidad.",
         p2: "Nuestro equipo multidisciplinario de ingenieros y especialistas entrega soluciones de clase mundial que perduran en el tiempo. Nuestro legado se basa en la confianza, la excelencia técnica y la búsqueda constante de innovación.",
+        iso: "ISO 9001:2015 — Sistema de Gestión de Calidad",
+        pbqp: "PBQP do Habitat — Nivel A",
+        licensing: "Licenciamiento Ambiental Completo",
+        safety: "Seguridad Laboral — Cumplimiento NR-18",
         years: "Años de Experiencia",
         delivered: "Obras Entregadas",
         level: "Nivel A",
         collaborators: "Colaboradores"
       },
-      infrastructure: {
+      equipments: {
         title1: "Infraestructura &",
         title2: "Capacidades",
         subtitle: "Soluciones completas en ingeniería pesada e infraestructura para proyectos de cualquier escala.",
@@ -215,6 +355,10 @@ const resources = {
         structures: "Estructuras Especiales",
         structuresDesc: "Puentes, viaductos y estructuras de contención con ingeniería de alta complejidad."
       },
+      constructions: {
+
+      },
+
       portfolio: {
         title1: "Proyectos",
         title2: "Destacados",

@@ -12,10 +12,9 @@ const Header = () => {
   const navLinks = [
     { label: t('header.home'), to: '/' },
     { label: t('header.company'), to: '/company' },
-    { label: t('header.equipments'), to: '/equipments' },
-    { label: t('header.constructions'), to: '/constructions' },
+    { label: t('header.equipments') || 'Equipamentos', to: '/EquipamentsPage' },
+    { label: t('header.constructions') || 'Obras', to: '/ConstructionsPage' },
     { label: t('header.portfolio'), to: '/portfolio' },
-    { label: t('header.institutional'), to: '/institutional' },
     { label: t('header.contact'), to: '/contact' },
   ];
 

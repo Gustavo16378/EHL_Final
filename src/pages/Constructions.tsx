@@ -1,9 +1,5 @@
-import InfrastructureSection from '@/components/landing/InfrastructureSection';
+import ConstructionSection from '@/components/landing/ConstructionsSection';
 
-const Constructions = () => (
-  <div className="pt-24">
-    <InfrastructureSection />
-  </div>
-);
+const ConstructionsPage = () => <ConstructionSection />;
 
-export default Constructions;
+export default ConstructionsPage;

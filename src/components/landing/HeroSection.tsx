@@ -54,20 +54,17 @@ const HeroSection = () => {
           <div className="animate-fade-up opacity-0 animation-delay-800 flex flex-wrap gap-4 mt-16" style={{ animationFillMode: 'forwards' }}>
             <div className="flex items-center gap-2 bg-card/60 border border-border/50 rounded-full px-4 py-2 backdrop-blur-sm">
               <Shield size={14} className="text-primary" />
-              <span className="text-xs text-silver font-light">ISO 9001:2015 Certified</span>
+              <span className="text-xs text-silver font-light">{t('hero.iso')}</span>
             </div>
             <div className="flex items-center gap-2 bg-card/60 border border-border/50 rounded-full px-4 py-2 backdrop-blur-sm">
               <Award size={14} className="text-primary" />
-              <span className="text-xs text-silver font-light">PBQP do Habitat Nível A</span>
+              <span className="text-xs text-silver font-light">{t('hero.pbqp')}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-float">
-        <span className="text-muted-foreground text-xs tracking-widest uppercase">{t('hero.scroll')}</span>
-        <ChevronDown size={18} className="text-primary" />
-      </div>
+      
     </section>
   );
 };

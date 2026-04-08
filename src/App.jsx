@@ -6,10 +6,9 @@ import { Toaster } from "@/components/ui/toaster";
 import Layout from "./components/Layout.tsx";
 import Home from "./pages/Home.tsx";
 import Company from "./pages/Company.tsx";
-import Equipments from "./pages/Equipments.tsx";
-import Constructions from "./pages/Constructions.tsx";
+import EquipamentsPage from "./pages/Equipaments.tsx";
+import ConstructionsPage from "./pages/Constructions.tsx";
 import Portfolio from "./pages/Portfolio.tsx";
-import Institucional from "./pages/Institucional.tsx";
 import Contact from "./pages/Contact.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -24,10 +23,9 @@ const App = () => (
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/company" element={<Company />} />
-          <Route path="/equipments" element={<Equipments />} />
-          <Route path="/constructions" element={<Constructions />} />
+          <Route path="/EquipamentsPage" element={<EquipamentsPage />} />
+          <Route path="/ConstructionsPage" element={<ConstructionsPage />} />
           <Route path="/portfolio" element={<Portfolio />} />
-          <Route path="/institutional" element={<Institucional />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="*" element={<NotFound />} />
         </Route>
