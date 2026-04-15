@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Strapi CMS (repo separado)
+cms/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

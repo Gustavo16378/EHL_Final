@@ -14,3 +14,23 @@ The React Compiler is not enabled on this template because of its impact on dev 
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+## CMS (Strapi)
+
+O projeto inclui um Strapi em `cms/` para permitir que um usuário admin edite conteúdos e imagens.
+
+### Rodar o Strapi
+
+- `cd cms`
+- `npm run develop`
+- Acesse `http://localhost:1337/admin` e crie o usuário admin
+
+Para o front-end conseguir ler os dados, habilite permissões de leitura:
+
+- Admin → **Settings** → **Users & Permissions** → **Roles** → **Public**
+- Marque `find` e `findOne` para: `equipment`, `construction`, `portfolio-project`, `hero-page`, `company-page`, `equipments-page`, `constructions-page`, `portfolio-page`, `contact-page`
+
+### Rodar o front-end
+
+- Crie um `.env` baseado em `.env.example` e ajuste `VITE_CMS_URL` (por padrão `http://localhost:1337`).
+- `npm run dev`

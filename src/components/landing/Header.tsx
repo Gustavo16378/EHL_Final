@@ -31,7 +31,7 @@ const Header = () => {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled ? 'bg-glass border-b border-border' : 'bg-transparent'
+        scrolled ? 'bg-background border-b border-border' : 'bg-transparent'
       }`}
     >
       <div className="container mx-auto flex items-center justify-between py-4 px-6">
@@ -85,7 +85,7 @@ const Header = () => {
       </div>
 
       {mobileOpen && (
-        <div className="lg:hidden bg-glass border-t border-border animate-fade-in-slow">
+        <div className="lg:hidden bg-background border-t border-border animate-fade-in-slow">
           <nav className="flex flex-col p-6 gap-4">
             {navLinks.map((link) => (
               <Link

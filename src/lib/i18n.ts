@@ -1,5 +1,4 @@
-import { Title } from '@radix-ui/react-dialog';
-import i18n, { t } from 'i18next';
+import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 const resources = {
@@ -23,6 +22,24 @@ const resources = {
         portfolio: "Nosso Portfólio",
         iso: "ISO 9001:2015 Certificado",
         pbqp: "PBQP do Habitat — Nível A",
+        widgets: {
+          video: "Vídeo",
+          videoTitle: "Vídeo institucional",
+          videoUnavailable: "Vídeo indisponível.",
+          videoExpand: "Expandir",
+          videoCollapse: "Recolher",
+          usd: "Dólar (USD → BRL)",
+          weather: "Tempo agora",
+          todayRange: "Hoje",
+          rain: "Chuva",
+          rainYes: "Sim",
+          rainNo: "Não",
+          updatedAt: "Atualizado em",
+          loading: "Carregando…",
+          usdError: "Não foi possível carregar a cotação agora.",
+          weatherNoLocation: "Permita a localização para ver o clima.",
+          weatherError: "Não foi possível carregar o clima agora."
+        }
       },
       company: {
         title1: "História &",
@@ -40,21 +57,20 @@ const resources = {
       },
 
       equipments: {
-        title: "Nossos Equipamentos",
+        title1: "Nossos",
+        title2: " Equipamentos",
         subtitle: "Frota própria de máquinas pesadas e equipamentos de última geração para atender obras de qualquer porte e complexidade.",
         1: {
           title: "Escavadeiras Hidráulicas",
           description: "Máquinas de alta performance para escavação de valas, fundações e movimentação de terra em grandes volumes. Frota com modelos de 20 a 50 toneladas.",
           amount: "12 unidades",
           category: "Escavação"
-
         },
         2: {
           title: "Caminhões Basculantes",
           description: "Frota de caminhões caçamba para transporte de terra, brita e materiais de construção. Capacidades de 14 m³ a 25 m³.",
           amount: "28 unidades",
           category: "Transporte"
-
         },
         3: {
           title: "Pavimentadoras de Asfalto",
@@ -85,6 +101,11 @@ const resources = {
         title1: "Obras",
         title2: " em Andamento",
         subtitle: "Acompanhe os projetos que a EHL está executando neste momento — engenharia pesada com excelência em todo o Brasil.",
+        labels: {
+          location: "Localização",
+          client: "Cliente",
+          forecast: "Previsão"
+        },
         1: {
           title: "Duplicação da BR-040 — Trecho Cristalina/GO",
           city: "Cristalina",
@@ -149,7 +170,56 @@ const resources = {
       portfolio: {
         title1: "Projetos em",
         title2: "Destaque",
-        subtitle: "Obras de engenharia de excelência por todo o Brasil."
+        subtitle: "Obras de engenharia de excelência por todo o Brasil.",
+        detailsTitle: "Detalhes de Execução",
+        1: {
+          title: "Vila Olímpica dos Jogos Indígenas",
+          category: "Infraestrutura",
+          location: "Palmas - TO",
+          description: "Construção completa do complexo esportivo para os Jogos Mundiais dos Povos Indígenas, incluindo infraestrutura viária, drenagem, paisagismo e edificações de apoio.",
+          details: {
+            1: "Terraplenagem e pavimentação do complexo",
+            2: "Sistema completo de drenagem pluvial",
+            3: "Infraestrutura elétrica e iluminação",
+            4: "Obras de contenção e paisagismo"
+          }
+        },
+        2: {
+          title: "Alphaville Palmas & Eusébio-CE",
+          category: "Desenvolvimento Urbano",
+          location: "Palmas-TO / Eusébio-CE",
+          description: "Execução de infraestrutura completa para loteamentos Alphaville, incluindo terraplenagem, pavimentação, redes de drenagem e abastecimento de água.",
+          details: {
+            1: "Terraplenagem e movimentação de terra",
+            2: "Pavimentação asfáltica e intertravamento",
+            3: "Redes de água e esgoto sanitário",
+            4: "Drenagem e galerias pluviais"
+          }
+        },
+        3: {
+          title: "BR-163 PA & GO-520",
+          category: "Pavimentação Rodoviária",
+          location: "Pará / Goiás",
+          description: "Obras de pavimentação e restauração em rodovias federais e estaduais, incluindo drenagem profunda, terraplenagem e sinalização viária.",
+          details: {
+            1: "Pavimentação asfáltica — CBUQ e TST",
+            2: "Drenagem profunda e superficial",
+            3: "Terraplenagem e regularização do subleito",
+            4: "Sinalização horizontal e vertical"
+          }
+        },
+        4: {
+          title: "Mobilidade Urbana Gurupi-TO",
+          category: "Mobilidade Urbana",
+          location: "Gurupi - TO",
+          description: "Execução de pavimentação e galerias de águas pluviais para melhoria da mobilidade urbana, contemplando diversas avenidas e ruas do município.",
+          details: {
+            1: "Galerias de águas pluviais em concreto",
+            2: "Pavimentação asfáltica urbana",
+            3: "Meio-fio e sarjeta",
+            4: "Sinalização e acessibilidade"
+          }
+        }
       },
       contact: {
         title1: "Entre em",
@@ -163,7 +233,8 @@ const resources = {
         emailPlaceholder: "Endereço de E-mail",
         subjectPlaceholder: "Assunto",
         messagePlaceholder: "Conte-nos sobre o seu projeto...",
-        sendButton: "Enviar Mensagem"
+        sendButton: "Enviar Mensagem",
+        sentButton: "Mensagem enviada!"
       },
       footer: {
         desc: "Excelência em engenharia desde 1998. Entregando soluções de classe mundial em infraestrutura, pavimentação e obras públicas por todo o Brasil.",
@@ -204,7 +275,25 @@ const resources = {
         discover: "Discover More",
         portfolio: "Our Portfolio",
         iso: "ISO 9001:2015 Certified",
-        pbqp: "PBQP do Habitat — Level A"
+        pbqp: "PBQP do Habitat — Level A",
+        widgets: {
+          video: "Video",
+          videoTitle: "Institutional video",
+          videoUnavailable: "Video unavailable.",
+          videoExpand: "Expand",
+          videoCollapse: "Collapse",
+          usd: "US Dollar (USD → BRL)",
+          weather: "Weather now",
+          todayRange: "Today",
+          rain: "Rain",
+          rainYes: "Yes",
+          rainNo: "No",
+          updatedAt: "Updated at",
+          loading: "Loading…",
+          usdError: "Couldn't load the exchange rate right now.",
+          weatherNoLocation: "Allow location access to see weather.",
+          weatherError: "Couldn't load the weather right now."
+        }
 
       },
       company: {
@@ -223,50 +312,171 @@ const resources = {
       },
 
       equipments: {
-        title: "Our Equipment",
+        title1: "Our",
+        title2: " Equipment",
         subtitle: "In-house fleet of heavy machinery and state-of-the-art equipment to serve projects of any size and complexity.",
         1: {
-          title: "Escavadeiras",
-          description: "Máquinas de alta performance para escavação de valas, fundações e movimentação de terra em grandes volumes. Frota com modelos de 20 a 50 toneladas.",
-          amount: "12 unidades",
-          category: "Escavação"
+          title: "Hydraulic Excavators",
+          description: "High-performance machines for digging trenches, foundations, and moving large volumes of earth. Fleet with models from 20 to 50 tons.",
+          amount: "12 units",
+          category: "Excavation"
         },
         2: {
-          title: "Caminhões Basculantes",
-          description: "Frota de caminhões caçamba para transporte de terra, brita e materiais de construção. Capacidades de 14 m³ a 25 m³.",
-          amount: "28 unidades",
-          category: "Transporte"
+          title: "Dump Trucks",
+          description: "Fleet of dump trucks for transporting earth, gravel, and construction materials. Capacities from 14 m³ to 25 m³.",
+          amount: "28 units",
+          category: "Transport"
         },
         3: {
-          title: "Pavimentadoras de Asfalto",
-          description: "Equipamentos de última geração para aplicação de massa asfáltica com controle eletrônico de espessura e nivelamento automático.",
-          amount: "4 unidades",
-          category: "Pavimentação"
+          title: "Asphalt Pavers",
+          description: "State-of-the-art equipment for applying asphalt mix with electronic thickness control and automatic leveling.",
+          amount: "4 units",
+          category: "Paving"
         },
         4: {
-          title: "Motoniveladoras",
-          description: "Máquinas para nivelamento e regularização de terrenos, preparo de sub-base e manutenção de estradas não pavimentadas.",
-          amount: "6 unidades",
-          category: "Terraplenagem"
+          title: "Motor Graders",
+          description: "Machines for grading and leveling terrain, preparing sub-base, and maintaining unpaved roads.",
+          amount: "6 units",
+          category: "Earthmoving"
         },
         5: {
-          title: "Pás Carregadeiras",
-          description: "Equipamentos versáteis para carga, descarga e movimentação de materiais em obras de infraestrutura e mineração.",
-          amount: "8 unidades",
-          category: "Movimentação"
+          title: "Wheel Loaders",
+          description: "Versatile equipment for loading, unloading, and moving materials in infrastructure and mining projects.",
+          amount: "8 units",
+          category: "Material Handling"
         },
         6: {
-          title: "Rolos Compactadores",
-          description: "Rolos vibratórios para compactação de aterros, sub-base e camadas asfálticas, garantindo a densidade especificada em projeto.",
-          amount: "10 unidades",
-          category: "Compactação"
+          title: "Compactor Rollers",
+          description: "Vibratory rollers for compacting embankments, sub-base, and asphalt layers, ensuring the density specified in the project.",
+          amount: "10 units",
+          category: "Compaction"
+        }
+      },
+
+      constructions: {
+        title1: "Projects",
+        title2: " in Progress",
+        subtitle: "Follow the projects EHL is currently executing — heavy engineering with excellence across Brazil.",
+        labels: {
+          location: "Location",
+          client: "Client",
+          forecast: "Forecast"
+        },
+        1: {
+          title: "BR-040 Duplication — Cristalina/GO Stretch",
+          city: "Cristalina",
+          uf: "GO",
+          client: "DNIT",
+          status: "In progress",
+          deliveryForecast: "Dec/2025",
+          description: "Duplication, earthworks and asphalt paving of 42 km on a federal highway.",
+          type: "Highway Paving"
+        },
+        2: {
+          title: "Urban Infrastructure — Parque das Águas Subdivision",
+          city: "Uberlândia",
+          uf: "MG",
+          client: "Ápia Construction",
+          status: "In progress",
+          deliveryForecast: "Mar/2026",
+          description: "Stormwater drainage network, culverts, paving and signage for a subdivision with 1,200 lots.",
+          type: "Urban Development"
+        },
+        3: {
+          title: "Bridge over the Paranaíba River — MS-395",
+          city: "Paranaíba",
+          uf: "MS",
+          client: "Government of the State of MS",
+          status: "In progress",
+          deliveryForecast: "Jun/2026",
+          description: "Construction of a prestressed concrete bridge with 180 m span and highway access works.",
+          type: "Special Structures"
+        },
+        4: {
+          title: "Drainage System — Av. Brasil, Anápolis",
+          city: "Anápolis",
+          uf: "GO",
+          client: "Anápolis City Hall",
+          status: "In progress",
+          deliveryForecast: "Sep/2025",
+          description: "Installation of stormwater galleries and asphalt resurfacing along 8 km of avenue.",
+          type: "Stormwater Galleries"
+        },
+        5: {
+          title: "Earthworks — Triângulo Logistics Complex",
+          city: "Uberaba",
+          uf: "MG",
+          client: "Log Commercial Properties",
+          status: "In progress",
+          deliveryForecast: "Nov/2025",
+          description: "Movement of 450,000 m³ of soil for an industrial platform and road accesses.",
+          type: "Earthworks"
+        },
+        6: {
+          title: "GO-060 Rehabilitation — Goiânia/Trindade Stretch",
+          city: "Goiânia",
+          uf: "GO",
+          client: "AGETOP",
+          status: "In progress",
+          deliveryForecast: "Feb/2026",
+          description: "Milling, resurfacing and horizontal/vertical signage along 25 km of state highway.",
+          type: "Highway Paving"
         }
       },
 
       portfolio: {
         title1: "Featured",
         title2: "Projects",
-        subtitle: "Engineering excellence projects throughout Brazil."
+        subtitle: "Engineering excellence projects throughout Brazil.",
+        detailsTitle: "Execution Details",
+        1: {
+          title: "Indigenous Games Olympic Village",
+          category: "Infrastructure",
+          location: "Palmas - TO",
+          description: "Full construction of the sports complex for the World Indigenous Peoples Games, including road infrastructure, drainage, landscaping, and support buildings.",
+          details: {
+            1: "Earthworks and paving of the complex",
+            2: "Complete stormwater drainage system",
+            3: "Electrical infrastructure and lighting",
+            4: "Retaining works and landscaping"
+          }
+        },
+        2: {
+          title: "Alphaville Palmas & Eusébio-CE",
+          category: "Urban Development",
+          location: "Palmas-TO / Eusébio-CE",
+          description: "Delivery of complete infrastructure for Alphaville residential developments, including earthworks, paving, drainage networks, and water supply.",
+          details: {
+            1: "Earthworks and soil movement",
+            2: "Asphalt paving and interlocking pavement",
+            3: "Water and sanitary sewer networks",
+            4: "Drainage and stormwater galleries"
+          }
+        },
+        3: {
+          title: "BR-163 PA & GO-520",
+          category: "Highway Paving",
+          location: "Pará / Goiás",
+          description: "Paving and rehabilitation works on federal and state highways, including deep drainage, earthworks, and road signage.",
+          details: {
+            1: "Asphalt paving — CBUQ and TST",
+            2: "Deep and surface drainage",
+            3: "Earthworks and subgrade regularization",
+            4: "Horizontal and vertical signage"
+          }
+        },
+        4: {
+          title: "Urban Mobility — Gurupi-TO",
+          category: "Urban Mobility",
+          location: "Gurupi - TO",
+          description: "Urban paving and stormwater galleries to improve mobility, covering several avenues and streets in the municipality.",
+          details: {
+            1: "Concrete stormwater galleries",
+            2: "Urban asphalt paving",
+            3: "Curb and gutter",
+            4: "Signage and accessibility"
+          }
+        }
       },
       contact: {
         title1: "Get in",
@@ -280,7 +490,8 @@ const resources = {
         emailPlaceholder: "Email Address",
         subjectPlaceholder: "Subject",
         messagePlaceholder: "Tell us about your project...",
-        sendButton: "Send Message"
+        sendButton: "Send Message",
+        sentButton: "Message Sent!"
       },
       footer: {
         desc: "Engineering excellence since 1998. Delivering world-class solutions in infrastructure, paving, and public works across Brazil.",
@@ -321,7 +532,25 @@ const resources = {
         discover: "Descubre Más",
         portfolio: "Nuestro Portafolio",
         iso: "ISO 9001:2015 Certificado",
-        pbqp: "PBQP do Habitat — Nivel A"
+        pbqp: "PBQP do Habitat — Nivel A",
+        widgets: {
+          video: "Video",
+          videoTitle: "Video institucional",
+          videoUnavailable: "Video no disponible.",
+          videoExpand: "Expandir",
+          videoCollapse: "Contraer",
+          usd: "Dólar (USD → BRL)",
+          weather: "Tiempo ahora",
+          todayRange: "Hoy",
+          rain: "Lluvia",
+          rainYes: "Sí",
+          rainNo: "No",
+          updatedAt: "Actualizado en",
+          loading: "Cargando…",
+          usdError: "No se pudo cargar la cotización ahora.",
+          weatherNoLocation: "Permite la ubicación para ver el clima.",
+          weatherError: "No se pudo cargar el clima ahora."
+        }
 
       },
       company: {
@@ -339,30 +568,170 @@ const resources = {
         collaborators: "Colaboradores"
       },
       equipments: {
-        title1: "Infraestructura &",
-        title2: "Capacidades",
-        subtitle: "Soluciones completas en ingeniería pesada e infraestructura para proyectos de cualquier escala.",
-        paving: "Pavimentación de Carreteras",
-        pavingDesc: "Ejecución de obras en carreteras federales y estatales — movimiento de tierras, drenaje y pavimentación asfáltica.",
-        urban: "Desarrollo Urbano",
-        urbanDesc: "Loteamientos, infraestructura urbana y obras de saneamiento en grandes desarrollos.",
-        drainage: "Alcantarillado Pluvial",
-        drainageDesc: "Construcción de alcantarillado pluvial y sistemas de drenaje para la movilidad urbana.",
-        publicWorks: "Obras Públicas",
-        publicWorksDesc: "Ejecución de grandes obras públicas con certificación PBQP-H e ISO 9001.",
-        earthwork: "Movimiento de Tierras",
-        earthworkDesc: "Movimiento de tierras a gran escala para obras de infraestructura y minería.",
-        structures: "Estructuras Especiales",
-        structuresDesc: "Puentes, viaductos y estructuras de contención con ingeniería de alta complejidad."
+        title1: "Nuestros ",
+        title2: " Equipos",
+        subtitle: "Flota propia de maquinaria pesada y equipos de última generación para atender obras de cualquier tamaño y complejidad.",
+        1: {
+          title: "Excavadoras Hidráulicas",
+          description: "Máquinas de alto rendimiento para excavación de zanjas, cimientos y movimiento de grandes volúmenes de tierra. Flota con modelos de 20 a 50 toneladas.",
+          amount: "12 unidades",
+          category: "Excavación"
+        },
+        2: {
+          title: "Camiones Volquete",
+          description: "Flota de camiones volquete para transporte de tierra, grava y materiales de construcción. Capacidades de 14 m³ a 25 m³.",
+          amount: "28 unidades",
+          category: "Transporte"
+        },
+        3: {
+          title: "Pavimentadoras de Asfalto",
+          description: "Equipos de última generación para la aplicación de mezcla asfáltica con control electrónico de espesor y nivelación automática.",
+          amount: "4 unidades",
+          category: "Pavimentación"
+        },
+        4: {
+          title: "Motoniveladoras",
+          description: "Máquinas para nivelación y regularización de terrenos, preparación de sub-base y mantenimiento de carreteras no pavimentadas.",
+          amount: "6 unidades",
+          category: "Movimiento de Tierras"
+        },
+        5: {
+          title: "Palas Cargadoras",
+          description: "Equipos versátiles para carga, descarga y movimiento de materiales en obras de infraestructura y minería.",
+          amount: "8 unidades",
+          category: "Manipulación de Materiales"
+        },
+        6: {
+          title: "Rodillos Compactadores",
+          description: "Rodillos vibratorios para la compactación de terraplenes, sub-base y capas asfálticas, garantizando la densidad especificada en el proyecto.",
+          amount: "10 unidades",
+          category: "Compactación"
+        }
       },
       constructions: {
-
+        title1: "Obras",
+        title2: " en Ejecución",
+        subtitle: "Sigue los proyectos que EHL está ejecutando ahora — ingeniería pesada con excelencia en todo Brasil.",
+        labels: {
+          location: "Ubicación",
+          client: "Cliente",
+          forecast: "Previsión"
+        },
+        1: {
+          title: "Duplicación de la BR-040 — Tramo Cristalina/GO",
+          city: "Cristalina",
+          uf: "GO",
+          client: "DNIT",
+          status: "En ejecución",
+          deliveryForecast: "Dic/2025",
+          description: "Duplicación, movimiento de tierras y pavimentación asfáltica de 42 km en carretera federal.",
+          type: "Pavimentación Vial"
+        },
+        2: {
+          title: "Infraestructura Urbana — Loteamiento Parque das Águas",
+          city: "Uberlândia",
+          uf: "MG",
+          client: "Constructora Ápia",
+          status: "En ejecución",
+          deliveryForecast: "Mar/2026",
+          description: "Red de drenaje, galerías pluviales, pavimentación y señalización de un loteamiento con 1.200 lotes.",
+          type: "Desarrollo Urbano"
+        },
+        3: {
+          title: "Puente sobre el Río Paranaíba — MS-395",
+          city: "Paranaíba",
+          uf: "MS",
+          client: "Gobierno del Estado de MS",
+          status: "En ejecución",
+          deliveryForecast: "Jun/2026",
+          description: "Construcción de un puente de hormigón pretensado con 180 m de extensión y accesos viales.",
+          type: "Obras Especiales"
+        },
+        4: {
+          title: "Sistema de Drenaje — Av. Brasil, Anápolis",
+          city: "Anápolis",
+          uf: "GO",
+          client: "Alcaldía de Anápolis",
+          status: "En ejecución",
+          deliveryForecast: "Sep/2025",
+          description: "Implantación de galerías pluviales y recapado asfáltico en 8 km de avenida.",
+          type: "Galerías Pluviales"
+        },
+        5: {
+          title: "Movimiento de Tierras — Complejo Logístico Triângulo",
+          city: "Uberaba",
+          uf: "MG",
+          client: "Log Commercial Properties",
+          status: "En ejecución",
+          deliveryForecast: "Nov/2025",
+          description: "Movimiento de 450.000 m³ de tierra para plataforma industrial y accesos viales.",
+          type: "Movimiento de Tierras"
+        },
+        6: {
+          title: "Restauración de la GO-060 — Tramo Goiânia/Trindade",
+          city: "Goiânia",
+          uf: "GO",
+          client: "AGETOP",
+          status: "En ejecución",
+          deliveryForecast: "Feb/2026",
+          description: "Fresado, recapado y señalización horizontal/vertical en 25 km de carretera estadual.",
+          type: "Pavimentación Vial"
+        }
       },
 
       portfolio: {
         title1: "Proyectos",
         title2: "Destacados",
-        subtitle: "Obras de excelencia en ingeniería por todo Brasil."
+        subtitle: "Obras de excelencia en ingeniería por todo Brasil.",
+        detailsTitle: "Detalles de Ejecución",
+        1: {
+          title: "Villa Olímpica de los Juegos Indígenas",
+          category: "Infraestructura",
+          location: "Palmas - TO",
+          description: "Construcción completa del complejo deportivo para los Juegos Mundiales de los Pueblos Indígenas, incluyendo infraestructura vial, drenaje, paisajismo y edificaciones de apoyo.",
+          details: {
+            1: "Movimiento de tierras y pavimentación del complejo",
+            2: "Sistema completo de drenaje pluvial",
+            3: "Infraestructura eléctrica e iluminación",
+            4: "Obras de contención y paisajismo"
+          }
+        },
+        2: {
+          title: "Alphaville Palmas & Eusébio-CE",
+          category: "Desarrollo Urbano",
+          location: "Palmas-TO / Eusébio-CE",
+          description: "Ejecución de infraestructura completa para loteamientos Alphaville, incluyendo movimiento de tierras, pavimentación, redes de drenaje y abastecimiento de agua.",
+          details: {
+            1: "Movimiento de tierras y excavación",
+            2: "Pavimentación asfáltica y adoquinado",
+            3: "Redes de agua y alcantarillado sanitario",
+            4: "Drenaje y galerías pluviales"
+          }
+        },
+        3: {
+          title: "BR-163 PA & GO-520",
+          category: "Pavimentación Vial",
+          location: "Pará / Goiás",
+          description: "Obras de pavimentación y restauración en carreteras federales y estaduales, incluyendo drenaje profundo, movimiento de tierras y señalización vial.",
+          details: {
+            1: "Pavimentación asfáltica — CBUQ y TST",
+            2: "Drenaje profundo y superficial",
+            3: "Movimiento de tierras y regularización de la subrasante",
+            4: "Señalización horizontal y vertical"
+          }
+        },
+        4: {
+          title: "Movilidad Urbana — Gurupi-TO",
+          category: "Movilidad Urbana",
+          location: "Gurupi - TO",
+          description: "Ejecución de pavimentación y galerías pluviales para mejorar la movilidad urbana, abarcando diversas avenidas y calles del municipio.",
+          details: {
+            1: "Galerías pluviales de concreto",
+            2: "Pavimentación asfáltica urbana",
+            3: "Bordillo y cuneta",
+            4: "Señalización y accesibilidad"
+          }
+        }
       },
       contact: {
         title1: "Ponte en",
@@ -376,7 +745,8 @@ const resources = {
         emailPlaceholder: "Correo Electrónico",
         subjectPlaceholder: "Asunto",
         messagePlaceholder: "Cuéntanos sobre tu proyecto...",
-        sendButton: "Enviar Mensaje"
+        sendButton: "Enviar Mensaje",
+        sentButton: "¡Mensaje enviado!"
       },
       footer: {
         desc: "Excelencia en ingeniería desde 1998. Entregando soluciones de clase mundial en infraestructura, pavimentación y obras públicas en todo Brasil.",

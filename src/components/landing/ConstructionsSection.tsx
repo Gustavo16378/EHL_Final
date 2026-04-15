@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { MapPin, Calendar, User, X } from 'lucide-react';
+import { MapPin, Calendar, User } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import obraRodovia from '@/assets/obra-rodovia.jpg';
 import obraDrenagem from '@/assets/obra-drenagem.jpg';
@@ -8,6 +8,7 @@ import obraPonte from '@/assets/obra-ponte.jpg';
 import obraTerraplenagem from '@/assets/obra-terraplenagem.jpg';
 import obraLoteamento from '@/assets/obra-loteamento.jpg';
 import { useTranslation } from 'react-i18next';
+import { fetchCollection, fetchSingle, getCmsImageUrl, resolveLocale } from '@/lib/cms';
 
 
 
@@ -24,12 +25,47 @@ interface Obra {
   imagem: string;
 }
 
+type CmsConstructionAttributes = {
+  name?: string;
+  city?: string;
+  uf?: string;
+  client?: string;
+  status?: string;
+  deliveryForecast?: string;
+  description?: string;
+  type?: string;
+  image?: unknown;
+};
+
+type CmsConstructionsPageAttributes = {
+  title1?: string;
+  title2?: string;
+  subtitle?: string;
+  labelLocation?: string;
+  labelClient?: string;
+  labelForecast?: string;
+};
+
 
 const ObrasSection = () => {
-  const { t } = useTranslation();
   const { ref, isVisible } = useScrollAnimation();
   const [selected, setSelected] = useState<Obra | null>(null);
-  let title: string[] = [t('constructions.title1'), t('constructions.title2'), t('constructions.subtitle'), t('constructions.1.title'), t('constructions.2.title'), t('constructions.3.title'), t('constructions.4.title'), t('constructions.5.title')];
+
+  const { t, i18n } = useTranslation();
+  const [cmsPage, setCmsPage] = useState<CmsConstructionsPageAttributes | null>(null);
+  const [cmsObras, setCmsObras] = useState<Obra[] | null>(null);
+
+  let title: string[] = [
+    t('constructions.title1'),
+    t('constructions.title2'),
+    t('constructions.subtitle'),
+    t('constructions.1.title'),
+    t('constructions.2.title'),
+    t('constructions.3.title'),
+    t('constructions.4.title'),
+    t('constructions.5.title'),
+    t('constructions.6.title'),
+  ];
 
   let city: string[] = [t('constructions.1.city'), t('constructions.2.city'), t('constructions.3.city'), t('constructions.4.city'), t('constructions.5.city'), t('constructions.6.city')];
    
@@ -45,80 +81,142 @@ const ObrasSection = () => {
 
   let type: string[] = [t('constructions.1.type'), t('constructions.2.type'), t('constructions.3.type'), t('constructions.4.type'), t('constructions.5.type'), t('constructions.6.type')];
 
-  const obrasEmAndamento: Obra[] = [
+  const fallbackObrasEmAndamento: Obra[] = [
     {
       id: 1,
-      nome: t('constructions.title'),
-      cidade: t('constructions.1.city'),
-      uf: t('constructions.1.uf'),
-      cliente: t('constructions.1.client'),
-      status: t('constructions.1.status'),
-      previsaoEntrega: t('constructions.1.deliveryForecast'),
-      descricao: t('constructions.1.description'),
-      tipo: t('constructions.1.type'),
+      nome: title[3],
+      cidade: city[0],
+      uf: uf[0],
+      cliente: client[0],
+      status: status[0],
+      previsaoEntrega: deliveryforecast[0],
+      descricao: description[0],
+      tipo: type[0],
       imagem: obraRodovia,
     },
     {
       id: 2,
-      nome: t('constructions.2.title'),
-      cidade: t('constructions.2.city'),
-      uf: t('constructions.2.uf'),
-      cliente: t('constructions.2.client'),
-      status: t('constructions.2.status'),
-      previsaoEntrega: t('constructions.2.deliveryForecast'),
-      descricao: t('constructions.2.description'),
-      tipo: t('constructions.2.type'),
+      nome: title[4],
+      cidade: city[1],
+      uf: uf[1],
+      cliente: client[1],
+      status: status[1],
+      previsaoEntrega: deliveryforecast[1],
+      descricao: description[1],
+      tipo: type[1],
       imagem: obraLoteamento,
     },
     {
       id: 3,
-      nome: t('constructions.3.title'),
-      cidade: t('constructions.3.city'),
-      uf: t('constructions.3.uf'),
-      cliente: t('constructions.3.client'),
-      status: t('constructions.3.status'),
-      previsaoEntrega: t('constructions.3.deliveryForecast'),
-      descricao: t('constructions.3.description'),
-      tipo: t('constructions.3.type'),
+      nome: title[5],
+      cidade: city[2],
+      uf: uf[2],
+      cliente: client[2],
+      status: status[2],
+      previsaoEntrega: deliveryforecast[2],
+      descricao: description[2],
+      tipo: type[2],
       imagem: obraPonte,
     },
     {
       id: 4,
-      nome: t('constructions.4.title'),
-      cidade: t('constructions.4.city'),
-      uf: t('constructions.4.uf'),
-      cliente: t('constructions.4.client'),
-      status: t('constructions.4.status'),
-      previsaoEntrega: t('constructions.4.deliveryForecast'),
-      descricao: t('constructions.4.description'),
-      tipo: t('constructions.4.type'),
+      nome: title[6],
+      cidade: city[3],
+      uf: uf[3],
+      cliente: client[3],
+      status: status[3],
+      previsaoEntrega: deliveryforecast[3],
+      descricao: description[3],
+      tipo: type[3],
       imagem: obraDrenagem,
     },
     {
       id: 5,
-      nome: t('constructions.5.title'),
-      cidade: t('constructions.5.city'),
-      uf: t('constructions.5.uf'),
-      cliente: t('constructions.5.client'),
-      status: t('constructions.5.status'),
-      previsaoEntrega: t('constructions.5.deliveryForecast'),
-      descricao: t('constructions.5.description'),
-      tipo: t('constructions.5.type'),
+      nome: title[7],
+      cidade: city[4],
+      uf: uf[4],
+      cliente: client[4],
+      status: status[4],
+      previsaoEntrega: deliveryforecast[4],
+      descricao: description[4],
+      tipo: type[4],
       imagem: obraTerraplenagem,
     },
     {
       id: 6,
-      nome: t('constructions.6.title'),
-      cidade: t('constructions.6.city'),
-      uf: t('constructions.6.uf'),
-      cliente: t('constructions.6.client'),
-      status: t('constructions.6.status'),
-      previsaoEntrega: t('constructions.6.deliveryForecast'),
-      descricao: t('constructions.6.description'),
-      tipo: t('constructions.6.type'),
+      nome: title[8],
+      cidade: city[5],
+      uf: uf[5],
+      cliente: client[5],
+      status: status[5],
+      previsaoEntrega: deliveryforecast[5],
+      descricao: description[5],
+      tipo: type[5],
       imagem: obraRodovia,
     },
   ];
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const locale = resolveLocale(i18n.language);
+        const [page, items] = await Promise.all([
+          fetchSingle<CmsConstructionsPageAttributes>('constructions-page', { locale }),
+          fetchCollection<CmsConstructionAttributes>('constructions', {
+            locale,
+            populate: 'image',
+            sort: 'id:asc',
+          }),
+        ]);
+
+        if (cancelled) return;
+        setCmsPage(page);
+
+        const mapped = items
+          .map((entity) => {
+            const attrs = entity.attributes ?? {};
+            const imageUrl = getCmsImageUrl((attrs as any).image) ?? obraRodovia;
+
+            return {
+              id: entity.id,
+              nome: (attrs as any).name ?? '',
+              cidade: (attrs as any).city ?? '',
+              uf: (attrs as any).uf ?? '',
+              cliente: (attrs as any).client ?? '',
+              status: (attrs as any).status ?? '',
+              previsaoEntrega: (attrs as any).deliveryForecast ?? '',
+              descricao: (attrs as any).description ?? '',
+              tipo: (attrs as any).type ?? '',
+              imagem: imageUrl,
+            } satisfies Obra;
+          })
+          .filter((obra) => Boolean(obra.nome));
+
+        setCmsObras(mapped.length ? mapped : null);
+      } catch {
+        if (cancelled) return;
+        setCmsPage(null);
+        setCmsObras(null);
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [i18n.language]);
+
+  const headerTitle1 = cmsPage?.title1 || t('constructions.title1');
+  const headerTitle2 = cmsPage?.title2 || t('constructions.title2');
+  const headerSubtitle = cmsPage?.subtitle || t('constructions.subtitle');
+
+  const labelLocation = cmsPage?.labelLocation || t('constructions.labels.location');
+  const labelClient = cmsPage?.labelClient || t('constructions.labels.client');
+  const labelForecast = cmsPage?.labelForecast || t('constructions.labels.forecast');
+
+  const obrasEmAndamento = cmsObras && cmsObras.length ? cmsObras : fallbackObrasEmAndamento;
   return (
     // ... JSX igual ao de ObrasPage ...
     <main className="min-h-screen py-32">
@@ -127,10 +225,10 @@ const ObrasSection = () => {
         <div className={`text-center max-w-3xl mx-auto mb-20 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="w-12 h-[2px] gradient-red-line mx-auto mb-6" />
           <h1 className="text-4xl sm:text-5xl font-extralight text-foreground mb-6">
-            {t('constructions.title1')}<span className="text-primary font-light">{t('constructions.title2')}</span>
+            {headerTitle1}<span className="text-primary font-light">{headerTitle2}</span>
           </h1>
           <p className="text-silver font-light text-lg">
-            {t('constructions.subtitle')}
+            {headerSubtitle}
           </p>
         </div>
         {/* ...restante do grid e modal... */}
@@ -183,7 +281,7 @@ const ObrasSection = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-primary/60" />
-                    <span>Previsão: {obra.previsaoEntrega}</span>
+                    <span>{labelForecast}: {obra.previsaoEntrega}</span>
                   </div>
                 </div>
               </div>
@@ -227,21 +325,21 @@ const ObrasSection = () => {
                     <div className="flex items-center gap-3">
                       <MapPin className="w-5 h-5 text-primary/70" />
                       <div>
-                        <p className="text-xs text-muted-foreground">Localização</p>
+                        <p className="text-xs text-muted-foreground">{labelLocation}</p>
                         <p className="text-sm text-foreground">{selected.cidade}/{selected.uf}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <User className="w-5 h-5 text-primary/70" />
                       <div>
-                        <p className="text-xs text-muted-foreground">Cliente</p>
+                        <p className="text-xs text-muted-foreground">{labelClient}</p>
                         <p className="text-sm text-foreground">{selected.cliente}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <Calendar className="w-5 h-5 text-primary/70" />
                       <div>
-                        <p className="text-xs text-muted-foreground">Previsão</p>
+                        <p className="text-xs text-muted-foreground">{labelForecast}</p>
                         <p className="text-sm text-foreground">{selected.previsaoEntrega}</p>
                       </div>
                     </div>

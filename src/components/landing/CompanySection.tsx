@@ -2,13 +2,57 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Shield, Target, Award, Users, CheckCircle } from 'lucide-react';
 import companyImage from '@/assets/company-office.jpg';
 import { useTranslation } from 'react-i18next';
+import { useEffect, useState } from 'react';
+import { fetchSingle, resolveLocale } from '@/lib/cms';
+
+type CmsCompanyPageAttributes = {
+  title1?: string;
+  title2?: string;
+  p1?: string;
+  p2?: string;
+  iso?: string;
+  pbqp?: string;
+  licensing?: string;
+  safety?: string;
+  yearsValue?: string;
+  deliveredValue?: string;
+  levelValue?: string;
+  collaboratorsValue?: string;
+};
 
 
 
 const CompanySection = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [cmsPage, setCmsPage] = useState<CmsCompanyPageAttributes | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const locale = resolveLocale(i18n.language);
+        const page = await fetchSingle<CmsCompanyPageAttributes>('company-page', { locale });
+        if (cancelled) return;
+        setCmsPage(page);
+      } catch {
+        if (cancelled) return;
+        setCmsPage(null);
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [i18n.language]);
   
-  let quality: string[] = [t('company.iso'), t('company.pbqp'), t('company.licensing'), t('company.safety')];
+  let quality: string[] = [
+    cmsPage?.iso || t('company.iso'),
+    cmsPage?.pbqp || t('company.pbqp'),
+    cmsPage?.licensing || t('company.licensing'),
+    cmsPage?.safety || t('company.safety'),
+  ];
 
   const qualityItems = [
     quality[0],
@@ -20,10 +64,10 @@ const CompanySection = () => {
   let label: string[] = [t('company.years'), t('company.delivered'), t('company.level'), t('company.collaborators')];
 
   const stats = [
-    { icon: Shield, value: '25+', label: label[0] },
-    { icon: Target, value: '200+', label: label[1] },
-    { icon: Award, value: 'Nível A', label: label[2] },
-    { icon: Users, value: '800+', label: label[3] },
+    { icon: Shield, value: cmsPage?.yearsValue || '25+', label: label[0] },
+    { icon: Target, value: cmsPage?.deliveredValue || '200+', label: label[1] },
+    { icon: Award, value: cmsPage?.levelValue || 'Nível A', label: label[2] },
+    { icon: Users, value: cmsPage?.collaboratorsValue || '800+', label: label[3] },
   ];
 
   const { ref, isVisible } = useScrollAnimation();
@@ -34,15 +78,15 @@ const CompanySection = () => {
           <div className={`transition-all duration-1000 ${isVisible ? 'animate-slide-left opacity-100' : 'opacity-0'}`}>
             <div className="w-12 h-[2px] gradient-red-line mb-6" />
             <h2 className="text-4xl sm:text-5xl font-extralight text-foreground mb-8 leading-tight">
-              {t('company.title1')}
+              {cmsPage?.title1 || t('company.title1')}
               <br />
-              <span className="font-light text-primary">{t('company.title2')}</span>
+              <span className="font-light text-primary">{cmsPage?.title2 || t('company.title2')}</span>
             </h2>
             <p className="text-silver text-lg font-light leading-relaxed mb-6">
-              {t('company.p1')}
+              {cmsPage?.p1 || t('company.p1')}
             </p>
             <p className="text-muted-foreground font-light leading-relaxed mb-8">
-              {t('company.p2')}
+              {cmsPage?.p2 || t('company.p2')}
             </p>
 
             <div className="space-y-3">

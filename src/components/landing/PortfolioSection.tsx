@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { ArrowUpRight, X } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import portfolioOlimpica from '@/assets/portfolio-olimpica.jpg';
 import portfolioUrban from '@/assets/portfolio-urban.jpg';
 import portfolioHighway from '@/assets/portfolio-highway.jpg';
 import portfolioMobility from '@/assets/portfolio-mobility.jpg';
+import { useTranslation } from 'react-i18next';
+import { fetchCollection, fetchSingle, getCmsImageUrl, resolveLocale } from '@/lib/cms';
 
 interface Project {
   image: string;
@@ -16,64 +18,143 @@ interface Project {
   details: string[];
 }
 
-const projects: Project[] = [
-  {
-    image: portfolioOlimpica,
-    title: 'Vila Olímpica dos Jogos Indígenas',
-    category: 'Infraestrutura',
-    location: 'Palmas - TO',
-    description: 'Construção completa do complexo esportivo para os Jogos Mundiais dos Povos Indígenas, incluindo infraestrutura viária, drenagem, paisagismo e edificações de apoio.',
-    details: [
-      'Terraplenagem e pavimentação do complexo',
-      'Sistema completo de drenagem pluvial',
-      'Infraestrutura elétrica e iluminação',
-      'Obras de contenção e paisagismo',
-    ],
-  },
-  {
-    image: portfolioUrban,
-    title: 'Alphaville Palmas & Eusébio-CE',
-    category: 'Desenvolvimento Urbano',
-    location: 'Palmas-TO / Eusébio-CE',
-    description: 'Execução de infraestrutura completa para loteamentos Alphaville, incluindo terraplenagem, pavimentação, redes de drenagem e abastecimento de água.',
-    details: [
-      'Terraplenagem e movimentação de terra',
-      'Pavimentação asfáltica e intertravamento',
-      'Redes de água e esgoto sanitário',
-      'Drenagem e galerias pluviais',
-    ],
-  },
-  {
-    image: portfolioHighway,
-    title: 'BR-163 PA & GO-520',
-    category: 'Pavimentação Rodoviária',
-    location: 'Pará / Goiás',
-    description: 'Obras de pavimentação e restauração em rodovias federais e estaduais, incluindo drenagem profunda, terraplenagem e sinalização viária.',
-    details: [
-      'Pavimentação asfáltica — CBUQ e TST',
-      'Drenagem profunda e superficial',
-      'Terraplenagem e regularização do subleito',
-      'Sinalização horizontal e vertical',
-    ],
-  },
-  {
-    image: portfolioMobility,
-    title: 'Mobilidade Urbana Gurupi-TO',
-    category: 'Mobilidade Urbana',
-    location: 'Gurupi - TO',
-    description: 'Execução de pavimentação e galerias de águas pluviais para melhoria da mobilidade urbana, contemplando diversas avenidas e ruas do município.',
-    details: [
-      'Galerias de águas pluviais em concreto',
-      'Pavimentação asfáltica urbana',
-      'Meio-fio e sarjeta',
-      'Sinalização e acessibilidade',
-    ],
-  },
-];
+type CmsPortfolioProjectAttributes = {
+  title?: string;
+  category?: string;
+  location?: string;
+  description?: string;
+  details?: unknown;
+  image?: unknown;
+};
+
+type CmsPortfolioPageAttributes = {
+  title1?: string;
+  title2?: string;
+  subtitle?: string;
+  detailsTitle?: string;
+};
 
 const PortfolioSection = () => {
   const { ref, isVisible } = useScrollAnimation();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const { t, i18n } = useTranslation();
+  const [cmsPage, setCmsPage] = useState<CmsPortfolioPageAttributes | null>(null);
+  const [cmsProjects, setCmsProjects] = useState<Project[] | null>(null);
+
+  const fallbackProjects: Project[] = [
+    {
+      image: portfolioOlimpica,
+      title: t('portfolio.1.title'),
+      category: t('portfolio.1.category'),
+      location: t('portfolio.1.location'),
+      description: t('portfolio.1.description'),
+      details: [
+        t('portfolio.1.details.1'),
+        t('portfolio.1.details.2'),
+        t('portfolio.1.details.3'),
+        t('portfolio.1.details.4'),
+      ],
+    },
+    {
+      image: portfolioUrban,
+      title: t('portfolio.2.title'),
+      category: t('portfolio.2.category'),
+      location: t('portfolio.2.location'),
+      description: t('portfolio.2.description'),
+      details: [
+        t('portfolio.2.details.1'),
+        t('portfolio.2.details.2'),
+        t('portfolio.2.details.3'),
+        t('portfolio.2.details.4'),
+      ],
+    },
+    {
+      image: portfolioHighway,
+      title: t('portfolio.3.title'),
+      category: t('portfolio.3.category'),
+      location: t('portfolio.3.location'),
+      description: t('portfolio.3.description'),
+      details: [
+        t('portfolio.3.details.1'),
+        t('portfolio.3.details.2'),
+        t('portfolio.3.details.3'),
+        t('portfolio.3.details.4'),
+      ],
+    },
+    {
+      image: portfolioMobility,
+      title: t('portfolio.4.title'),
+      category: t('portfolio.4.category'),
+      location: t('portfolio.4.location'),
+      description: t('portfolio.4.description'),
+      details: [
+        t('portfolio.4.details.1'),
+        t('portfolio.4.details.2'),
+        t('portfolio.4.details.3'),
+        t('portfolio.4.details.4'),
+      ],
+    },
+  ];
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const locale = resolveLocale(i18n.language);
+
+        const [page, items] = await Promise.all([
+          fetchSingle<CmsPortfolioPageAttributes>('portfolio-page', { locale }),
+          fetchCollection<CmsPortfolioProjectAttributes>('portfolio-projects', {
+            locale,
+            populate: 'image',
+            sort: 'id:asc',
+          }),
+        ]);
+
+        if (cancelled) return;
+        setCmsPage(page);
+
+        const mapped = items
+          .map((entity) => {
+            const attrs = entity.attributes ?? {};
+            const imageUrl = getCmsImageUrl((attrs as any).image) ?? portfolioOlimpica;
+            const rawDetails = (attrs as any).details;
+            const details = Array.isArray(rawDetails)
+              ? rawDetails.filter((d) => typeof d === 'string' && d.trim().length)
+              : [];
+
+            return {
+              image: imageUrl,
+              title: (attrs as any).title ?? '',
+              category: (attrs as any).category ?? '',
+              location: (attrs as any).location ?? '',
+              description: (attrs as any).description ?? '',
+              details,
+            } satisfies Project;
+          })
+          .filter((p) => Boolean(p.title));
+
+        setCmsProjects(mapped.length ? mapped : null);
+      } catch {
+        if (cancelled) return;
+        setCmsPage(null);
+        setCmsProjects(null);
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [i18n.language]);
+
+  const headerTitle1 = cmsPage?.title1 || t('portfolio.title1');
+  const headerTitle2 = cmsPage?.title2 || t('portfolio.title2');
+  const headerSubtitle = cmsPage?.subtitle || t('portfolio.subtitle');
+  const detailsTitle = cmsPage?.detailsTitle || t('portfolio.detailsTitle');
+
+  const projects = cmsProjects && cmsProjects.length ? cmsProjects : fallbackProjects;
 
   return (
     <section id="portfolio" className="py-32">
@@ -82,11 +163,11 @@ const PortfolioSection = () => {
           <div>
             <div className="w-12 h-[2px] gradient-red-line mb-6" />
             <h2 className="text-4xl sm:text-5xl font-extralight text-foreground">
-              Featured <span className="text-primary font-light">Projects</span>
+              {headerTitle1} <span className="text-primary font-light">{headerTitle2}</span>
             </h2>
           </div>
           <p className="text-silver font-light mt-4 sm:mt-0 max-w-sm">
-            Obras de engenharia de excelência por todo o Brasil.
+            {headerSubtitle}
           </p>
         </div>
 
@@ -149,7 +230,7 @@ const PortfolioSection = () => {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="mt-6 space-y-3">
-                  <h4 className="text-foreground text-sm font-medium uppercase tracking-wider">Detalhes de Execução</h4>
+                  <h4 className="text-foreground text-sm font-medium uppercase tracking-wider">{detailsTitle}</h4>
                   {selectedProject.details.map((detail) => (
                     <div key={detail} className="flex items-center gap-3">
                       <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
