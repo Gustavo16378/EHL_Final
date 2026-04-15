@@ -1,0 +1,59 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-strapi}
+      POSTGRES_USER: ${POSTGRES_USER:-strapi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-strapi}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  cms:
+    build:
+      context: ./cms
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    ports:
+      - "1337:1337"
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 1337
+
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${POSTGRES_DB:-strapi}
+      DATABASE_USERNAME: ${POSTGRES_USER:-strapi}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-strapi}
+
+      # Segredos (obrigatórios). Defaults abaixo são APENAS para DEV local.
+      # Em produção, gere valores fortes e defina via .env/secret manager.
+      APP_KEYS: "${APP_KEYS:-change_me_1,change_me_2}"
+      API_TOKEN_SALT: "${API_TOKEN_SALT:-change_me}"
+      ADMIN_JWT_SECRET: "${ADMIN_JWT_SECRET:-change_me}"
+      TRANSFER_TOKEN_SALT: "${TRANSFER_TOKEN_SALT:-change_me}"
+      JWT_SECRET: "${JWT_SECRET:-change_me}"
+      ENCRYPTION_KEY: "${ENCRYPTION_KEY:-change_me}"
+
+      # CORS para o front no Docker
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+    volumes:
+      - cms_uploads:/opt/app/public/uploads
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Atenção: essa URL é usada no BUILD do Vite (vira estática no bundle)
+        VITE_CMS_URL: ${VITE_CMS_URL:-http://localhost:1337}
+    depends_on:
+      - cms
+    ports:
+      - "8080:80"
+
+volumes:
+  postgres_data:
+  cms_uploads:

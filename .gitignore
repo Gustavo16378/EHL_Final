@@ -25,3 +25,7 @@ cms/
 *.njsproj
 *.sln
 *.sw?
+
+# Env (segredos locais)
+.env
+.env.docker

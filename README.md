@@ -34,3 +34,32 @@ Para o front-end conseguir ler os dados, habilite permissões de leitura:
 
 - Crie um `.env` baseado em `.env.example` e ajuste `VITE_CMS_URL` (por padrão `http://localhost:1337`).
 - `npm run dev`
+
+## Docker (web + CMS + Postgres)
+
+Pré-requisitos:
+
+- Docker Desktop instalado
+
+### 1) Criar arquivo de ambiente
+
+- Copie `.env.docker.example` para `.env`
+- Gere valores fortes para os segredos do Strapi (exemplo com Node):
+	- `node -e "const c=require('crypto'); console.log('APP_KEYS='+[1,2].map(()=>c.randomBytes(16).toString('hex')).join(','))"`
+	- `node -e "const c=require('crypto'); console.log('API_TOKEN_SALT='+c.randomBytes(32).toString('hex'))"`
+	- Repita para `ADMIN_JWT_SECRET`, `TRANSFER_TOKEN_SALT`, `JWT_SECRET`, `ENCRYPTION_KEY`
+
+### 2) Subir os containers
+
+- `docker compose up -d --build`
+
+URLs:
+
+- Site: `http://localhost:8080`
+- Strapi Admin: `http://localhost:1337/admin`
+
+### Observações importantes
+
+- O `VITE_CMS_URL` é usado no **build** do front (Vite). Se você mudar esse valor no `.env`, rode `docker compose up -d --build` de novo.
+- Banco (Postgres) e uploads (imagens) ficam persistidos em volumes do Docker.
+	- Para resetar tudo (apaga dados e imagens): `docker compose down -v`

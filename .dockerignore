@@ -1,0 +1,19 @@
+node_modules
+npm-debug.log*
+
+# Build outputs
+dist
+
+# Vite/OS
+*.local
+.DS_Store
+
+# Git
+.git
+
+# Strapi (quando estiver no mesmo workspace)
+cms/node_modules
+cms/.tmp
+cms/dist
+cms/.cache
+cms/.strapi
