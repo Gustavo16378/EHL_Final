@@ -267,7 +267,7 @@ const HeroSection = () => {
         </div>
 
         <div className="container mx-auto px-6 relative z-10">
-          <div className="w-full lg:max-w-5xl lg:ml-auto grid grid-cols-1 gap-4">
+          <div className="w-full lg:max-w-5xl lg:mx-auto grid grid-cols-1 gap-4">
             <div className="bg-card/60 border border-border/50 rounded-lg p-4 backdrop-blur-sm">
               <div className="flex items-center justify-between gap-3 text-muted-foreground mb-3">
                 <div className="flex items-center gap-2">
