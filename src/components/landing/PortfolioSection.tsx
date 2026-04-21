@@ -114,11 +114,11 @@ const PortfolioSection = () => {
 
         {loading ? (
           <div className="text-center py-16 text-muted-foreground text-sm font-light">
-            {t('portfolio.loading') || 'Carregando...'}
+            Carregando...
           </div>
         ) : projects.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground text-sm font-light">
-            {t('portfolio.empty') || 'Nenhum projeto cadastrado no momento.'}
+            Nenhum projeto cadastrado no momento.
           </div>
         ) : (
           <div className={`grid md:grid-cols-2 gap-6 transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>

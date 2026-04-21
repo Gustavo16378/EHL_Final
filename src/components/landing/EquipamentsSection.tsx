@@ -107,11 +107,11 @@ const EquipamentsSection = () => {
 
         {loading ? (
           <div className="text-center py-16 text-muted-foreground text-sm font-light">
-            {t('equipments.loading') || 'Carregando...'}
+            Carregando...
           </div>
         ) : equipamentos.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground text-sm font-light">
-            {t('equipments.empty') || 'Nenhum equipamento cadastrado no momento.'}
+            Nenhum equipamento cadastrado no momento.
           </div>
         ) : (
           <div className={`grid md:grid-cols-2 xl:grid-cols-3 gap-8 transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>

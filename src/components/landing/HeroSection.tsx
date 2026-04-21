@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { DollarSign, CloudSun, PlaySquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import heroImage from '@/assets/hero-infrastructure.jpg';
@@ -229,18 +230,18 @@ const HeroSection = () => {
             </p>
 
             <div className="animate-fade-up opacity-0 animation-delay-600 flex gap-4 mt-12" style={{ animationFillMode: 'forwards' }}>
-              <a
-                href="#company"
+              <Link
+                to="/company"
                 className="bg-primary text-primary-foreground px-8 py-3.5 rounded text-sm font-medium hover:opacity-90 transition-opacity"
               >
                 {heroDiscover}
-              </a>
-              <a
-                href="#portfolio"
+              </Link>
+              <Link
+                to="/portfolio"
                 className="border border-border text-foreground px-8 py-3.5 rounded text-sm font-medium hover:bg-secondary transition-colors"
               >
                 {heroPortfolio}
-              </a>
+              </Link>
             </div>
 
             <div className="animate-fade-up opacity-0 animation-delay-800 grid grid-cols-1 sm:grid-cols-2 gap-4 mt-12" style={{ animationFillMode: 'forwards' }}>

@@ -23,6 +23,7 @@ class CmsRequestError extends Error {
 }
 
 const CMS_URL = (import.meta as any).env?.VITE_CMS_URL as string | undefined;
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 horas
 
 export const getCmsBaseUrl = () => CMS_URL ?? 'http://localhost:1337';
 
@@ -45,6 +46,38 @@ const buildUrl = (path: string, params?: Record<string, string | undefined>) => 
   return url;
 };
 
+// Cache helpers
+const cacheGet = <T>(key: string): T | null => {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const { data, ts } = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL_MS) return null;
+    return data as T;
+  } catch {
+    return null;
+  }
+};
+
+const cacheSet = (key: string, data: unknown) => {
+  try {
+    localStorage.setItem(key, JSON.stringify({ data, ts: Date.now() }));
+  } catch {
+    // localStorage cheio ou bloqueado — ignora silenciosamente
+  }
+};
+
+const cacheGetStale = <T>(key: string): T | null => {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const { data } = JSON.parse(raw);
+    return data as T;
+  } catch {
+    return null;
+  }
+};
+
 const fetchJson = async <T>(url: URL): Promise<T> => {
   const res = await fetch(url.toString());
   if (!res.ok) {
@@ -58,7 +91,6 @@ const fetchJson = async <T>(url: URL): Promise<T> => {
     const err = new CmsRequestError({ status: res.status, url: url.toString(), body });
 
     if ((import.meta as any).env?.DEV) {
-      // Ajuda a debugar CORS/permissões/publicação/URL base sem quebrar o UX.
       console.warn(err.message, body ? { body } : undefined);
     }
 
@@ -95,6 +127,12 @@ export const fetchSingle = async <TAttributes>(
   apiName: string,
   opts?: { locale?: string; populate?: string }
 ): Promise<TAttributes | null> => {
+  const cacheKey = `cms:single:${apiName}:${opts?.locale ?? ''}:${opts?.populate ?? ''}`;
+
+  // Retorna cache válido se existir
+  const cached = cacheGet<TAttributes>(cacheKey);
+  if (cached) return cached;
+
   const url = buildUrl(`/api/${apiName}`, {
     locale: opts?.locale,
     populate: opts?.populate,
@@ -102,18 +140,24 @@ export const fetchSingle = async <TAttributes>(
 
   try {
     const json = await fetchJson<StrapiResponse<any>>(url);
-    return unwrapSingle<TAttributes>(json);
+    const result = unwrapSingle<TAttributes>(json);
+    if (result) cacheSet(cacheKey, result);
+    return result;
   } catch (e) {
-    // Alguns setups do Strapi (v5) retornam 404 quando o locale não existe.
-    // Nessa situação, re-tenta sem o parâmetro `locale` para usar o locale padrão do CMS.
     if (e instanceof CmsRequestError && e.status === 404 && opts?.locale) {
-      const fallbackUrl = buildUrl(`/api/${apiName}`, {
-        populate: opts?.populate,
-      });
-      const json = await fetchJson<StrapiResponse<any>>(fallbackUrl);
-      return unwrapSingle<TAttributes>(json);
+      const fallbackUrl = buildUrl(`/api/${apiName}`, { populate: opts?.populate });
+      try {
+        const json = await fetchJson<StrapiResponse<any>>(fallbackUrl);
+        const result = unwrapSingle<TAttributes>(json);
+        if (result) cacheSet(cacheKey, result);
+        return result;
+      } catch {
+        // Strapi fora do ar — usa cache antigo se existir
+        return cacheGetStale<TAttributes>(cacheKey);
+      }
     }
-    throw e;
+    // Strapi fora do ar — usa cache antigo se existir
+    return cacheGetStale<TAttributes>(cacheKey);
   }
 };
 
@@ -121,6 +165,11 @@ export const fetchCollection = async <TAttributes>(
   apiName: string,
   opts?: { locale?: string; populate?: string; sort?: string }
 ): Promise<Array<StrapiEntity<TAttributes>>> => {
+  const cacheKey = `cms:col:${apiName}:${opts?.locale ?? ''}:${opts?.populate ?? ''}:${opts?.sort ?? ''}`;
+
+  const cached = cacheGet<Array<StrapiEntity<TAttributes>>>(cacheKey);
+  if (cached) return cached;
+
   const url = buildUrl(`/api/${apiName}`, {
     locale: opts?.locale,
     populate: opts?.populate,
@@ -129,17 +178,25 @@ export const fetchCollection = async <TAttributes>(
 
   try {
     const json = await fetchJson<StrapiResponse<any>>(url);
-    return unwrapCollection<TAttributes>(json);
+    const result = unwrapCollection<TAttributes>(json);
+    if (result.length) cacheSet(cacheKey, result);
+    return result;
   } catch (e) {
     if (e instanceof CmsRequestError && e.status === 404 && opts?.locale) {
       const fallbackUrl = buildUrl(`/api/${apiName}`, {
         populate: opts?.populate,
         sort: opts?.sort,
       });
-      const json = await fetchJson<StrapiResponse<any>>(fallbackUrl);
-      return unwrapCollection<TAttributes>(json);
+      try {
+        const json = await fetchJson<StrapiResponse<any>>(fallbackUrl);
+        const result = unwrapCollection<TAttributes>(json);
+        if (result.length) cacheSet(cacheKey, result);
+        return result;
+      } catch {
+        return cacheGetStale<Array<StrapiEntity<TAttributes>>>(cacheKey) ?? [];
+      }
     }
-    throw e;
+    return cacheGetStale<Array<StrapiEntity<TAttributes>>>(cacheKey) ?? [];
   }
 };
 

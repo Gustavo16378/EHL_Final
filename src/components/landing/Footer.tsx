@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import ehlLogo from '@/assets/ehl-logo.png';
+import ehlLogo from '@/assets/Logo.png';
 import { fetchSingle, getCmsImageUrl, resolveLocale } from '@/lib/cms';
 import { useRefetchOnFocus } from '@/hooks/useRefetchOnFocus';
 
