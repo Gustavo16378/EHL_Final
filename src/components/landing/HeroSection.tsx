@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Shield, Award, DollarSign, CloudSun, PlaySquare } from 'lucide-react';
+import { DollarSign, CloudSun, PlaySquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import heroImage from '@/assets/hero-infrastructure.jpg';
-import { fetchSingle, resolveLocale } from '@/lib/cms';
+import { fetchSingle, getCmsImageUrl, resolveLocale } from '@/lib/cms';
+import { useRefetchOnFocus } from '@/hooks/useRefetchOnFocus';
 
 type CmsHeroPageAttributes = {
   title1?: string;
@@ -10,9 +11,8 @@ type CmsHeroPageAttributes = {
   subtitle?: string;
   discoverLabel?: string;
   portfolioLabel?: string;
-  isoBadge?: string;
-  pbqpBadge?: string;
   videoUrl?: string;
+  heroImage?: unknown;
 };
 
 type ExchangeState =
@@ -49,6 +49,7 @@ const getYouTubeVideoId = (url: string) => {
 
 const HeroSection = () => {
   const { t, i18n } = useTranslation();
+  const refetchTick = useRefetchOnFocus();
   const [cmsHero, setCmsHero] = useState<CmsHeroPageAttributes | null>(null);
   const [exchange, setExchange] = useState<ExchangeState>({ status: 'idle' });
   const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -61,8 +62,13 @@ const HeroSection = () => {
     const load = async () => {
       try {
         const locale = resolveLocale(i18n.language);
-        const page = await fetchSingle<CmsHeroPageAttributes>('hero-page', { locale });
+        const page = await fetchSingle<CmsHeroPageAttributes>('hero-page', { locale, populate: 'heroImage' });
         if (cancelled) return;
+
+        if ((import.meta as any).env?.DEV) {
+          console.log('[CMS] hero-page loaded', { locale, page });
+        }
+
         setCmsHero(page);
       } catch {
         if (cancelled) return;
@@ -74,7 +80,7 @@ const HeroSection = () => {
     return () => {
       cancelled = true;
     };
-  }, [i18n.language]);
+  }, [i18n.language, refetchTick]);
 
   const videoUrl = cmsHero?.videoUrl || 'https://www.youtube.com/watch?v=quH1knOa49M';
   const youtubeVideoId = useMemo(() => getYouTubeVideoId(videoUrl), [videoUrl]);
@@ -84,9 +90,7 @@ const HeroSection = () => {
   const heroSubtitle = cmsHero?.subtitle || t('hero.subtitle');
   const heroDiscover = cmsHero?.discoverLabel || t('hero.discover');
   const heroPortfolio = cmsHero?.portfolioLabel || t('hero.portfolio');
-  const heroIso = cmsHero?.isoBadge || t('hero.iso');
-  const heroPbqp = cmsHero?.pbqpBadge || t('hero.pbqp');
-
+  const heroBgImage = getCmsImageUrl(cmsHero?.heroImage) ?? heroImage;
   useEffect(() => {
     if (!navigator.geolocation) {
       setWeather({ status: 'no-location' });
@@ -198,7 +202,7 @@ const HeroSection = () => {
       <section id="home" className="relative min-h-screen flex items-center overflow-hidden">
         <div className="absolute inset-0">
           <img
-            src={heroImage}
+            src={heroBgImage}
             alt="Infrastructure engineering project"
             width={1920}
             height={1080}
@@ -239,70 +243,7 @@ const HeroSection = () => {
               </a>
             </div>
 
-            <div className="animate-fade-up opacity-0 animation-delay-800 flex flex-wrap gap-4 mt-16" style={{ animationFillMode: 'forwards' }}>
-              <div className="flex items-center gap-2 bg-card/60 border border-border/50 rounded-full px-4 py-2 backdrop-blur-sm">
-                <Shield size={14} className="text-primary" />
-                <span className="text-xs text-silver font-light">{heroIso}</span>
-              </div>
-              <div className="flex items-center gap-2 bg-card/60 border border-border/50 rounded-full px-4 py-2 backdrop-blur-sm">
-                <Award size={14} className="text-primary" />
-                <span className="text-xs text-silver font-light">{heroPbqp}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src={heroImage}
-            alt="Infrastructure engineering project"
-            width={1920}
-            height={1080}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60" />
-        </div>
-
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="w-full lg:max-w-5xl lg:mx-auto grid grid-cols-1 gap-4">
-            <div className="bg-card/60 border border-border/50 rounded-lg p-4 backdrop-blur-sm">
-              <div className="flex items-center justify-between gap-3 text-muted-foreground mb-3">
-                <div className="flex items-center gap-2">
-                  <PlaySquare size={16} className="text-primary" />
-                  <span className="text-xs font-medium tracking-wide uppercase">{t('hero.widgets.video')}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsVideoLarge((v) => !v)}
-                  aria-pressed={isVideoLarge}
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors border border-border/60 rounded px-2 py-1"
-                >
-                  {isVideoLarge ? t('hero.widgets.videoCollapse') : t('hero.widgets.videoExpand')}
-                </button>
-              </div>
-              {youtubeVideoId ? (
-                <div
-                  className="relative w-full overflow-hidden rounded-md border border-border"
-                  style={{ paddingTop: isVideoLarge ? '50%' : '56.25%' }}
-                >
-                  <iframe
-                    className="absolute inset-0 w-full h-full"
-                    src={`https://www.youtube-nocookie.com/embed/${youtubeVideoId}`}
-                    title={t('hero.widgets.videoTitle')}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    allowFullScreen
-                  />
-                </div>
-              ) : (
-                <p className="text-sm text-silver font-light">{t('hero.widgets.videoUnavailable')}</p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="animate-fade-up opacity-0 animation-delay-800 grid grid-cols-1 sm:grid-cols-2 gap-4 mt-12" style={{ animationFillMode: 'forwards' }}>
               <div className="bg-card/60 border border-border/50 rounded-lg p-4 backdrop-blur-sm">
                 <div className="flex items-center gap-2 text-muted-foreground mb-3">
                   <DollarSign size={16} className="text-primary" />
@@ -352,6 +293,58 @@ const HeroSection = () => {
                   <p className="text-sm text-silver font-light">{t('hero.widgets.loading')}</p>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative py-24 overflow-hidden">
+        <div className="absolute inset-0">
+          <img
+            src={heroBgImage}
+            alt="Infrastructure engineering project"
+            width={1920}
+            height={1080}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60" />
+        </div>
+
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="w-full lg:max-w-5xl lg:mx-auto">
+            <div className="bg-card/60 border border-border/50 rounded-lg p-4 backdrop-blur-sm">
+              <div className="flex items-center justify-between gap-3 text-muted-foreground mb-3">
+                <div className="flex items-center gap-2">
+                  <PlaySquare size={16} className="text-primary" />
+                  <span className="text-xs font-medium tracking-wide uppercase">{t('hero.widgets.video')}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsVideoLarge((v) => !v)}
+                  aria-pressed={isVideoLarge}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors border border-border/60 rounded px-2 py-1"
+                >
+                  {isVideoLarge ? t('hero.widgets.videoCollapse') : t('hero.widgets.videoExpand')}
+                </button>
+              </div>
+              {youtubeVideoId ? (
+                <div
+                  className="relative w-full overflow-hidden rounded-md border border-border"
+                  style={{ paddingTop: isVideoLarge ? '50%' : '56.25%' }}
+                >
+                  <iframe
+                    className="absolute inset-0 w-full h-full"
+                    src={`https://www.youtube-nocookie.com/embed/${youtubeVideoId}`}
+                    title={t('hero.widgets.videoTitle')}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <p className="text-sm text-silver font-light">{t('hero.widgets.videoUnavailable')}</p>
+              )}
             </div>
           </div>
         </div>

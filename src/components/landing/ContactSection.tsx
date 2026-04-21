@@ -3,6 +3,7 @@ import { MapPin, Phone, Mail, Send, Newspaper } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { fetchSingle, resolveLocale } from '@/lib/cms';
+import { useRefetchOnFocus } from '@/hooks/useRefetchOnFocus';
 
 type CmsContactPageAttributes = {
   title1?: string;
@@ -30,6 +31,7 @@ const ContactSection = () => {
   const { ref, isVisible } = useScrollAnimation();
   const [submitted, setSubmitted] = useState(false);
   const { t, i18n } = useTranslation();
+  const refetchTick = useRefetchOnFocus();
   const [cmsPage, setCmsPage] = useState<CmsContactPageAttributes | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -57,7 +59,7 @@ const ContactSection = () => {
     return () => {
       cancelled = true;
     };
-  }, [i18n.language]);
+  }, [i18n.language, refetchTick]);
 
   const headerTitle1 = cmsPage?.title1 || t('contact.title1');
   const headerTitle2 = cmsPage?.title2 || t('contact.title2');

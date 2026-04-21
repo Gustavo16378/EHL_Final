@@ -3,7 +3,8 @@ import { Shield, Target, Award, Users, CheckCircle } from 'lucide-react';
 import companyImage from '@/assets/company-office.jpg';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
-import { fetchSingle, resolveLocale } from '@/lib/cms';
+import { fetchSingle, getCmsImageUrl, resolveLocale } from '@/lib/cms';
+import { useRefetchOnFocus } from '@/hooks/useRefetchOnFocus';
 
 type CmsCompanyPageAttributes = {
   title1?: string;
@@ -18,12 +19,14 @@ type CmsCompanyPageAttributes = {
   deliveredValue?: string;
   levelValue?: string;
   collaboratorsValue?: string;
+  companyImage?: any[];
 };
 
 
 
 const CompanySection = () => {
   const { t, i18n } = useTranslation();
+  const refetchTick = useRefetchOnFocus();
   const [cmsPage, setCmsPage] = useState<CmsCompanyPageAttributes | null>(null);
 
   useEffect(() => {
@@ -32,7 +35,10 @@ const CompanySection = () => {
     const load = async () => {
       try {
         const locale = resolveLocale(i18n.language);
-        const page = await fetchSingle<CmsCompanyPageAttributes>('company-page', { locale });
+        const page = await fetchSingle<CmsCompanyPageAttributes>('company-page', {
+          locale,
+          populate: 'companyImage',
+        });
         if (cancelled) return;
         setCmsPage(page);
       } catch {
@@ -45,11 +51,9 @@ const CompanySection = () => {
     return () => {
       cancelled = true;
     };
-  }, [i18n.language]);
+  }, [i18n.language, refetchTick]);
   
   let quality: string[] = [
-    cmsPage?.iso || t('company.iso'),
-    cmsPage?.pbqp || t('company.pbqp'),
     cmsPage?.licensing || t('company.licensing'),
     cmsPage?.safety || t('company.safety'),
   ];
@@ -57,8 +61,6 @@ const CompanySection = () => {
   const qualityItems = [
     quality[0],
     quality[1],
-    quality[2],
-    quality[3],
   ];
 
   let label: string[] = [t('company.years'), t('company.delivered'), t('company.level'), t('company.collaborators')];
@@ -102,7 +104,7 @@ const CompanySection = () => {
           <div className={`transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <div className="relative rounded-lg overflow-hidden">
               <img
-                src={companyImage}
+                src={getCmsImageUrl(cmsPage?.companyImage?.[0]) || companyImage}
                 alt="EHL corporate headquarters"
                 width={1280}
                 height={960}
