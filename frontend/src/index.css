@@ -9,8 +9,8 @@
     --card: 220 10% 17%;                /* Cinza levemente mais claro */
     --card-foreground: 0 0% 97%;
 
-    --primary: 355 68% 40%;             /* Vermelho EHL institucional */
-    --primary-foreground: 0 0% 97%;     /* Branco sobre vermelho */
+    --primary: 46 98% 53%;              /* Amarelo faixa: #FFD000 */
+    --primary-foreground: 220 10% 17%;  /* Texto escuro em bg amarelo */
 
     --secondary: 222 47% 25%;           /* Azul EHL pro header/nav: #2b4162 */
     --secondary-foreground: 0 0% 97%;
@@ -23,7 +23,7 @@
 
     --border: 220 10% 17%;              /* Mesma do card */
     --input: 220 10% 17%;
-    --ring: 355 68% 40%;                /* Anel de foco em vermelho */
+    --ring: 46 98% 53%;                 /* Anel de foco em amarelo */
     --radius: 0.5rem;
   }
 }
@@ -46,11 +46,11 @@
   background: hsl(220 8% 13%);
 }
 ::-webkit-scrollbar-thumb {
-  background: hsl(355 68% 40%);
+  background: hsl(46 98% 53%);
   border-radius: 0;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(355 68% 52%);
+  background: hsl(46 98% 65%);
 }
 
 @layer utilities {
