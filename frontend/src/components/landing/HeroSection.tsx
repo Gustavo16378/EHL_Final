@@ -220,7 +220,7 @@ const HeroSection = () => {
         </div>
 
         {/* DESKTOP: imagem lado direito absoluta */}
-        <div className="hidden md:block absolute right-0 top-0 w-[58%] h-full">
+        <div className="hidden md:block absolute right-0 top-0 w-[65%] h-full">
           {slides.map((src, i) => (
             <img
               key={src}
@@ -233,7 +233,9 @@ const HeroSection = () => {
               style={{ opacity: i === current ? 1 : 0, transition: `opacity ${FADE_DURATION}ms ease-in-out` }}
             />
           ))}
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/55 to-transparent" />
+          {/* Sombra esquerda: cobre a borda + blenda com o background */}
+          <div className="absolute inset-y-0 left-0 w-16 bg-background" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background from-[8%] via-background/60 via-[30%] to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/50" />
         </div>
 
