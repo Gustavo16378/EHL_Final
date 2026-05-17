@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import ehlLogo from '@/assets/Logo.png';
 import { fetchSingle, getCmsImageUrl, resolveLocale } from '@/lib/cms';
 import { useRefetchOnFocus } from '@/hooks/useRefetchOnFocus';
+import { useScrollDirection } from '@/hooks/useScrollDirection';
 
 type CmsGlobalConfig = {
   logo?: unknown;
@@ -64,6 +65,9 @@ const Header = () => {
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
 
+  const scrollDirection = useScrollDirection();
+  const hidden = scrollDirection === 'down' && scrolled && !mobileOpen;
+
   const logoUrl = getCmsImageUrl(cmsGlobal?.logo) ?? null;
   const companyName = cmsGlobal?.companyName || 'Eletro Hidro Ltda.';
   const contactLabel = cmsGlobal?.contactButtonLabel || t('header.contact');
@@ -89,7 +93,7 @@ const Header = () => {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled ? 'bg-background border-b border-border' : 'bg-transparent'
-        }`}
+        } ${hidden ? '-translate-y-full' : 'translate-y-0'}`}
       >
         <div className="container mx-auto flex items-center justify-between py-4 px-6">
           <Link to="/" className="flex items-center gap-3">

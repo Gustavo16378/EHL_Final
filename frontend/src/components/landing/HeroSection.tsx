@@ -1,8 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { DollarSign, CloudSun, PlaySquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import heroImage from '@/assets/hero-infrastructure.jpg';
+import slidePonteFHC from '@/assets/portifolio/PontePresidenteFHC.jpg';
+import slideFerroviaNS from '@/assets/portifolio/FerroviaNorteSul.jfif';
+import slideConsorcioPontes from '@/assets/ConsorcioPontes.jpeg';
+import slideAlphaville from '@/assets/portifolio/AlphavillePalmas.jpg';
+import slideGO139 from '@/assets/portifolio/GO-139.jpg';
 import { fetchSingle, getCmsImageUrl, resolveLocale } from '@/lib/cms';
 import { useRefetchOnFocus } from '@/hooks/useRefetchOnFocus';
 
@@ -48,6 +52,9 @@ const getYouTubeVideoId = (url: string) => {
   }
 };
 
+const SLIDE_INTERVAL = 5000;
+const FADE_DURATION = 350;
+
 const HeroSection = () => {
   const { t, i18n } = useTranslation();
   const refetchTick = useRefetchOnFocus();
@@ -56,31 +63,22 @@ const HeroSection = () => {
   const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [weather, setWeather] = useState<WeatherState>({ status: 'idle' });
   const [isVideoLarge, setIsVideoLarge] = useState(false);
+  const [current, setCurrent] = useState(0);
+  const [imgVisible, setImgVisible] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-
     const load = async () => {
       try {
         const locale = resolveLocale(i18n.language);
         const page = await fetchSingle<CmsHeroPageAttributes>('hero-page', { locale, populate: 'heroImage' });
-        if (cancelled) return;
-
-        if ((import.meta as any).env?.DEV) {
-          console.log('[CMS] hero-page loaded', { locale, page });
-        }
-
-        setCmsHero(page);
+        if (!cancelled) setCmsHero(page);
       } catch {
-        if (cancelled) return;
-        setCmsHero(null);
+        if (!cancelled) setCmsHero(null);
       }
     };
-
     load();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [i18n.language, refetchTick]);
 
   const videoUrl = cmsHero?.videoUrl || 'https://www.youtube.com/watch?v=quH1knOa49M';
@@ -91,20 +89,37 @@ const HeroSection = () => {
   const heroSubtitle = cmsHero?.subtitle || t('hero.subtitle');
   const heroDiscover = cmsHero?.discoverLabel || t('hero.discover');
   const heroPortfolio = cmsHero?.portfolioLabel || t('hero.portfolio');
-  const heroBgImage = getCmsImageUrl(cmsHero?.heroImage) ?? heroImage;
+  const slides = useMemo(() => [
+    slidePonteFHC,
+    slideFerroviaNS,
+    slideConsorcioPontes,
+    slideAlphaville,
+    slideGO139,
+  ], []);
+
+  const goTo = useCallback((index: number) => {
+    if (index === current) return;
+    setImgVisible(false);
+    setTimeout(() => {
+      setCurrent(index);
+      setImgVisible(true);
+    }, FADE_DURATION);
+  }, [current]);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      goTo((current + 1) % slides.length);
+    }, SLIDE_INTERVAL);
+    return () => window.clearInterval(id);
+  }, [current, goTo, slides.length]);
+
   useEffect(() => {
     if (!navigator.geolocation) {
       setWeather({ status: 'no-location' });
       return;
     }
-
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setCoords({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-        });
-      },
+      (pos) => setCoords({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
       () => setWeather({ status: 'no-location' }),
       { enableHighAccuracy: false, timeout: 10_000, maximumAge: 30 * 60 * 1000 }
     );
@@ -113,19 +128,15 @@ const HeroSection = () => {
   useEffect(() => {
     let isMounted = true;
     const abortController = new AbortController();
-
     const fetchUsdBrl = async () => {
       setExchange((prev) => (prev.status === 'ready' ? prev : { status: 'loading' }));
       try {
-        const res = await fetch('https://open.er-api.com/v6/latest/USD', {
-          signal: abortController.signal,
-        });
+        const res = await fetch('https://open.er-api.com/v6/latest/USD', { signal: abortController.signal });
         if (!res.ok) throw new Error('exchange');
         const data = await res.json();
         const brl = Number(data?.rates?.BRL);
         const updatedUnix = Number(data?.time_last_update_unix);
         if (!Number.isFinite(brl) || !Number.isFinite(updatedUnix)) throw new Error('exchange-shape');
-
         if (!isMounted) return;
         setExchange({ status: 'ready', brlPerUsd: brl, updatedAt: new Date(updatedUnix * 1000) });
       } catch {
@@ -133,23 +144,15 @@ const HeroSection = () => {
         setExchange({ status: 'error' });
       }
     };
-
     fetchUsdBrl();
     const id = window.setInterval(fetchUsdBrl, 10 * 60 * 1000);
-
-    return () => {
-      isMounted = false;
-      abortController.abort();
-      window.clearInterval(id);
-    };
+    return () => { isMounted = false; abortController.abort(); window.clearInterval(id); };
   }, []);
 
   useEffect(() => {
     if (!coords) return;
-
     let isMounted = true;
     const abortController = new AbortController();
-
     const fetchWeather = async () => {
       setWeather((prev) => (prev.status === 'ready' ? prev : { status: 'loading' }));
       try {
@@ -159,61 +162,81 @@ const HeroSection = () => {
         url.searchParams.set('current', 'temperature_2m');
         url.searchParams.set('daily', 'temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum');
         url.searchParams.set('timezone', 'auto');
-
         const res = await fetch(url.toString(), { signal: abortController.signal });
         if (!res.ok) throw new Error('weather');
         const data = await res.json();
-
         const now = Number(data?.current?.temperature_2m);
         const max = Number(data?.daily?.temperature_2m_max?.[0]);
         const min = Number(data?.daily?.temperature_2m_min?.[0]);
         const rainProbMax = Number(data?.daily?.precipitation_probability_max?.[0]);
         const precipitationSum = Number(data?.daily?.precipitation_sum?.[0]);
-
         if (![now, max, min, rainProbMax, precipitationSum].every(Number.isFinite)) throw new Error('weather-shape');
-
         if (!isMounted) return;
-        setWeather({
-          status: 'ready',
-          temperatureNow: now,
-          temperatureMax: max,
-          temperatureMin: min,
-          rainProbabilityMax: Math.max(0, Math.min(100, rainProbMax)),
-          willRain: rainProbMax >= 50 || precipitationSum > 0,
-          updatedAt: new Date(),
-        });
+        setWeather({ status: 'ready', temperatureNow: now, temperatureMax: max, temperatureMin: min, rainProbabilityMax: Math.max(0, Math.min(100, rainProbMax)), willRain: rainProbMax >= 50 || precipitationSum > 0, updatedAt: new Date() });
       } catch {
         if (!isMounted) return;
         setWeather({ status: 'error' });
       }
     };
-
     fetchWeather();
     const id = window.setInterval(fetchWeather, 10 * 60 * 1000);
-
-    return () => {
-      isMounted = false;
-      abortController.abort();
-      window.clearInterval(id);
-    };
+    return () => { isMounted = false; abortController.abort(); window.clearInterval(id); };
   }, [coords]);
 
   return (
     <>
-      <section id="home" className="relative min-h-screen flex items-center overflow-hidden">
-        <div className="absolute inset-0">
+      <section id="home" className="relative overflow-hidden bg-background md:min-h-screen md:flex md:items-center">
+
+        {/* MOBILE: imagem topo largura total */}
+        <div
+          className="md:hidden relative w-full h-[58vh] flex-shrink-0"
+          style={{ opacity: imgVisible ? 1 : 0, transition: `opacity ${FADE_DURATION}ms ease` }}
+        >
           <img
-            src={heroBgImage}
+            src={slides[current]}
+            alt="Infrastructure engineering project"
+            width={1280}
+            height={960}
+            className="w-full h-full object-cover object-center"
+          />
+          {/* Gradiente base — funde com o conteúdo abaixo */}
+          <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-transparent to-background" />
+          {/* Indicadores sobre a imagem no mobile */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => goTo(i)}
+                aria-label={`Slide ${i + 1}`}
+                className="h-[2px] rounded-full transition-all duration-300"
+                style={{
+                  width: i === current ? '28px' : '12px',
+                  background: i === current ? 'hsl(var(--primary))' : 'rgba(255,255,255,0.4)',
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* DESKTOP: imagem lado direito absoluta */}
+        <div
+          className="hidden md:block absolute right-0 top-0 w-[58%] h-full"
+          style={{ opacity: imgVisible ? 1 : 0, transition: `opacity ${FADE_DURATION}ms ease` }}
+        >
+          <img
+            src={slides[current]}
             alt="Infrastructure engineering project"
             width={1920}
             height={1080}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-center"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/55 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/50" />
         </div>
 
-        <div className="container mx-auto px-6 relative z-10 py-24">
+        {/* Conteúdo — igual ao original */}
+        <div className="container mx-auto px-6 relative z-10 py-10 md:py-24">
           <div className="max-w-3xl">
             <div className="animate-fade-up opacity-0" style={{ animationFillMode: 'forwards' }}>
               <div className="w-16 h-[2px] gradient-red-line mb-8" />
@@ -244,7 +267,74 @@ const HeroSection = () => {
               </Link>
             </div>
 
-            <div className="animate-fade-up opacity-0 animation-delay-800 grid grid-cols-1 sm:grid-cols-2 gap-4 mt-12" style={{ animationFillMode: 'forwards' }}>
+          </div>
+        </div>
+
+        {/* Indicadores do carrossel — apenas desktop */}
+        <div className="hidden md:flex absolute bottom-8 right-8 z-20 items-center gap-3">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => goTo(i)}
+              aria-label={`Slide ${i + 1}`}
+              className="h-[2px] rounded-full transition-all duration-300"
+              style={{
+                width: i === current ? '32px' : '14px',
+                background: i === current ? 'hsl(var(--primary))' : 'rgba(255,255,255,0.3)',
+              }}
+            />
+          ))}
+        </div>
+
+        {/* SCROLL — apenas desktop */}
+        <div className="hidden md:flex absolute bottom-8 left-8 z-20 flex-col items-center gap-2">
+          <div className="w-[1px] h-10 bg-border/60" />
+          <span className="text-[10px] font-medium tracking-[0.25em] text-muted-foreground uppercase">Scroll</span>
+        </div>
+      </section>
+
+      {/* Seção de vídeo + widgets */}
+      <section className="py-16">
+        <div className="container mx-auto px-6">
+          <div className="w-full space-y-4">
+            {/* Card de vídeo */}
+            <div className="bg-card/60 border border-border/50 rounded-lg p-4 backdrop-blur-sm">
+              <div className="flex items-center justify-between gap-3 text-muted-foreground mb-3">
+                <div className="flex items-center gap-2">
+                  <PlaySquare size={16} className="text-primary" />
+                  <span className="text-xs font-medium tracking-wide uppercase">{t('hero.widgets.video')}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsVideoLarge((v) => !v)}
+                  aria-pressed={isVideoLarge}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors border border-border/60 rounded px-2 py-1"
+                >
+                  {isVideoLarge ? t('hero.widgets.videoCollapse') : t('hero.widgets.videoExpand')}
+                </button>
+              </div>
+              {youtubeVideoId ? (
+                <div
+                  className="relative w-full overflow-hidden rounded-md border border-border"
+                  style={{ paddingTop: isVideoLarge ? '50%' : '56.25%' }}
+                >
+                  <iframe
+                    className="absolute inset-0 w-full h-full"
+                    src={`https://www.youtube-nocookie.com/embed/${youtubeVideoId}`}
+                    title={t('hero.widgets.videoTitle')}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <p className="text-sm text-silver font-light">{t('hero.widgets.videoUnavailable')}</p>
+              )}
+            </div>
+
+            {/* Widgets dólar e clima */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="bg-card/60 border border-border/50 rounded-lg p-4 backdrop-blur-sm">
                 <div className="flex items-center gap-2 text-muted-foreground mb-3">
                   <DollarSign size={16} className="text-primary" />
@@ -294,58 +384,6 @@ const HeroSection = () => {
                   <p className="text-sm text-silver font-light">{t('hero.widgets.loading')}</p>
                 )}
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src={heroBgImage}
-            alt="Infrastructure engineering project"
-            width={1920}
-            height={1080}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60" />
-        </div>
-
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="w-full lg:max-w-5xl lg:mx-auto">
-            <div className="bg-card/60 border border-border/50 rounded-lg p-4 backdrop-blur-sm">
-              <div className="flex items-center justify-between gap-3 text-muted-foreground mb-3">
-                <div className="flex items-center gap-2">
-                  <PlaySquare size={16} className="text-primary" />
-                  <span className="text-xs font-medium tracking-wide uppercase">{t('hero.widgets.video')}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsVideoLarge((v) => !v)}
-                  aria-pressed={isVideoLarge}
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors border border-border/60 rounded px-2 py-1"
-                >
-                  {isVideoLarge ? t('hero.widgets.videoCollapse') : t('hero.widgets.videoExpand')}
-                </button>
-              </div>
-              {youtubeVideoId ? (
-                <div
-                  className="relative w-full overflow-hidden rounded-md border border-border"
-                  style={{ paddingTop: isVideoLarge ? '50%' : '56.25%' }}
-                >
-                  <iframe
-                    className="absolute inset-0 w-full h-full"
-                    src={`https://www.youtube-nocookie.com/embed/${youtubeVideoId}`}
-                    title={t('hero.widgets.videoTitle')}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    allowFullScreen
-                  />
-                </div>
-              ) : (
-                <p className="text-sm text-silver font-light">{t('hero.widgets.videoUnavailable')}</p>
-              )}
             </div>
           </div>
         </div>

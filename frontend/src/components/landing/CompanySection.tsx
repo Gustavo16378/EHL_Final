@@ -68,7 +68,6 @@ const CompanySection = () => {
   const stats = [
     { icon: Shield, value: cmsPage?.yearsValue || '25+', label: label[0] },
     { icon: Target, value: cmsPage?.deliveredValue || '200+', label: label[1] },
-    { icon: Award, value: cmsPage?.levelValue || 'Nível A', label: label[2] },
     { icon: Users, value: cmsPage?.collaboratorsValue || '800+', label: label[3] },
   ];
 
@@ -116,7 +115,7 @@ const CompanySection = () => {
           </div>
         </div>
 
-        <div className={`grid grid-cols-2 lg:grid-cols-4 gap-8 mt-24 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        <div className={`grid grid-cols-3 gap-8 mt-24 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           {stats.map((stat) => (
             <div key={stat.label} className="text-center group">
               <stat.icon size={24} className="mx-auto text-primary mb-4 group-hover:scale-110 transition-transform" />
