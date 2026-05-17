@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { DollarSign, CloudSun, PlaySquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -52,8 +52,8 @@ const getYouTubeVideoId = (url: string) => {
   }
 };
 
-const SLIDE_INTERVAL = 5000;
-const FADE_DURATION = 350;
+const SLIDE_INTERVAL = 5500;
+const FADE_DURATION = 900;
 
 const HeroSection = () => {
   const { t, i18n } = useTranslation();
@@ -64,9 +64,6 @@ const HeroSection = () => {
   const [weather, setWeather] = useState<WeatherState>({ status: 'idle' });
   const [isVideoLarge, setIsVideoLarge] = useState(false);
   const [current, setCurrent] = useState(0);
-  const [nextIdx, setNextIdx] = useState<number | null>(null);
-  const [incomingVisible, setIncomingVisible] = useState(false);
-  const transitioningRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -99,18 +96,9 @@ const HeroSection = () => {
     slideGO139,
   ], []);
 
-  const goTo = useCallback((index: number) => {
-    if (transitioningRef.current || index === current) return;
-    transitioningRef.current = true;
-    setNextIdx(index);
-    requestAnimationFrame(() => requestAnimationFrame(() => setIncomingVisible(true)));
-    setTimeout(() => {
-      setCurrent(index);
-      setNextIdx(null);
-      setIncomingVisible(false);
-      transitioningRef.current = false;
-    }, FADE_DURATION + 50);
-  }, [current]);
+  const goTo = useCallback((idx: number) => {
+    setCurrent(idx);
+  }, []);
 
   useEffect(() => {
     slides.forEach(src => { const img = new Image(); img.src = src; });
@@ -118,10 +106,10 @@ const HeroSection = () => {
 
   useEffect(() => {
     const id = window.setInterval(() => {
-      goTo((current + 1) % slides.length);
+      setCurrent(c => (c + 1) % slides.length);
     }, SLIDE_INTERVAL);
     return () => window.clearInterval(id);
-  }, [current, goTo, slides.length]);
+  }, [slides.length]);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -199,25 +187,18 @@ const HeroSection = () => {
 
         {/* MOBILE: imagem topo largura total */}
         <div className="md:hidden relative w-full h-[58vh] flex-shrink-0">
-          {nextIdx !== null && (
+          {slides.map((src, i) => (
             <img
-              src={slides[nextIdx]}
-              alt=""
-              aria-hidden
+              key={src}
+              src={src}
+              alt={i === 0 ? 'Infrastructure engineering project' : ''}
+              aria-hidden={i !== 0}
               width={1280}
               height={960}
               className="absolute inset-0 w-full h-full object-cover object-center"
-              style={{ opacity: incomingVisible ? 1 : 0, transition: `opacity ${FADE_DURATION}ms ease` }}
+              style={{ opacity: i === current ? 1 : 0, transition: `opacity ${FADE_DURATION}ms ease-in-out` }}
             />
-          )}
-          <img
-            src={slides[current]}
-            alt="Infrastructure engineering project"
-            width={1280}
-            height={960}
-            className="absolute inset-0 w-full h-full object-cover object-center"
-            style={{ opacity: nextIdx !== null ? 0 : 1, transition: `opacity ${FADE_DURATION}ms ease` }}
-          />
+          ))}
           {/* Gradiente base — funde com o conteúdo abaixo */}
           <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-transparent to-background" />
           {/* Indicadores sobre a imagem no mobile */}
@@ -240,25 +221,18 @@ const HeroSection = () => {
 
         {/* DESKTOP: imagem lado direito absoluta */}
         <div className="hidden md:block absolute right-0 top-0 w-[58%] h-full">
-          {nextIdx !== null && (
+          {slides.map((src, i) => (
             <img
-              src={slides[nextIdx]}
-              alt=""
-              aria-hidden
+              key={src}
+              src={src}
+              alt={i === 0 ? 'Infrastructure engineering project' : ''}
+              aria-hidden={i !== 0}
               width={1920}
               height={1080}
               className="absolute inset-0 w-full h-full object-cover object-center"
-              style={{ opacity: incomingVisible ? 1 : 0, transition: `opacity ${FADE_DURATION}ms ease` }}
+              style={{ opacity: i === current ? 1 : 0, transition: `opacity ${FADE_DURATION}ms ease-in-out` }}
             />
-          )}
-          <img
-            src={slides[current]}
-            alt="Infrastructure engineering project"
-            width={1920}
-            height={1080}
-            className="absolute inset-0 w-full h-full object-cover object-center"
-            style={{ opacity: nextIdx !== null ? 0 : 1, transition: `opacity ${FADE_DURATION}ms ease` }}
-          />
+          ))}
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/55 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/50" />
         </div>
@@ -271,7 +245,7 @@ const HeroSection = () => {
               <h1 className="text-5xl sm:text-6xl lg:text-8xl font-extralight tracking-tight text-foreground leading-[1.05]">
                 {heroTitle1}
                 <br />
-                <span className="font-light">{heroTitle2}</span>
+                <span className="font-light whitespace-nowrap">{heroTitle2}</span>
                 <span className="text-primary font-normal">.</span>
               </h1>
             </div>

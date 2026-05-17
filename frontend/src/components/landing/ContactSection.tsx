@@ -96,7 +96,7 @@ const ContactSection = () => {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-5 gap-12 max-w-5xl mx-auto">
+          <div className="grid lg:grid-cols-5 gap-12 max-w-5xl mx-auto mb-12">
             <div className="lg:col-span-2 space-y-8">
               {[
                 { icon: MapPin, title: addressTitle, text: addressText },
@@ -148,6 +148,18 @@ const ContactSection = () => {
                 <Send size={16} />
               </button>
             </form>
+          </div>
+          <div className="max-w-5xl mx-auto rounded-lg overflow-hidden border border-border/50">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3926.454351653393!2d-48.3150536!3d-10.224891399999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9324cb76deed2087%3A0x1c5b3ce08c35dfca!2sEHL%20-%20Eletro%20Hidro!5e0!3m2!1spt-BR!2sbr!4v1779059805092!5m2!1spt-BR!2sbr"
+              width="100%"
+              height="380"
+              style={{ border: 0, display: 'block' }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="EHL — Eletro Hidro no Google Maps"
+            />
           </div>
         </div>
       </div>

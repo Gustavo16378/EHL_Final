@@ -15,8 +15,8 @@ const resources = {
         quote: "Fazer Orçamento",
       },
       hero: {
-        title1: "EXCELÊNCIA EM",
-        title2: "ENGENHARIA",
+        title1: "EXCELÊNCIA",
+        title2: "EM ENGENHARIA",
         subtitle: "Construindo o futuro da infraestrutura em todo o Brasil desde 1998. Especializados em rodovias, desenvolvimento urbano e grandes obras públicas.",
         discover: "Descubra Mais",
         portfolio: "Nosso Portfólio",
@@ -526,8 +526,8 @@ const resources = {
         quote: "Cotizar",
       },
       hero: {
-        title1: "EXCELENCIA EN",
-        title2: "INGENIERÍA",
+        title1: "EXCELENCIA",
+        title2: "EN INGENIERÍA",
         subtitle: "Construyendo el futuro de la infraestructura en todo Brasil desde 1998. Especializados en carreteras, desarrollo urbano y grandes obras públicas.",
         discover: "Descubre Más",
         portfolio: "Nuestro Portafolio",
