@@ -89,11 +89,11 @@ const HeroSection = () => {
   const heroDiscover = cmsHero?.discoverLabel || t('hero.discover');
   const heroPortfolio = cmsHero?.portfolioLabel || t('hero.portfolio');
   const slides = useMemo(() => [
-    slidePonteFHC,
-    slideFerroviaNS,
     slideConsorcioPontes,
     slideAlphaville,
     slideGO139,
+    slideFerroviaNS,
+    slidePonteFHC,
   ], []);
 
   const goTo = useCallback((idx: number) => {
