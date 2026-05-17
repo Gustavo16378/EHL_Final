@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { DollarSign, CloudSun, PlaySquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -64,7 +64,9 @@ const HeroSection = () => {
   const [weather, setWeather] = useState<WeatherState>({ status: 'idle' });
   const [isVideoLarge, setIsVideoLarge] = useState(false);
   const [current, setCurrent] = useState(0);
-  const [imgVisible, setImgVisible] = useState(true);
+  const [nextIdx, setNextIdx] = useState<number | null>(null);
+  const [incomingVisible, setIncomingVisible] = useState(false);
+  const transitioningRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -98,13 +100,21 @@ const HeroSection = () => {
   ], []);
 
   const goTo = useCallback((index: number) => {
-    if (index === current) return;
-    setImgVisible(false);
+    if (transitioningRef.current || index === current) return;
+    transitioningRef.current = true;
+    setNextIdx(index);
+    requestAnimationFrame(() => requestAnimationFrame(() => setIncomingVisible(true)));
     setTimeout(() => {
       setCurrent(index);
-      setImgVisible(true);
-    }, FADE_DURATION);
+      setNextIdx(null);
+      setIncomingVisible(false);
+      transitioningRef.current = false;
+    }, FADE_DURATION + 50);
   }, [current]);
+
+  useEffect(() => {
+    slides.forEach(src => { const img = new Image(); img.src = src; });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const id = window.setInterval(() => {
@@ -188,16 +198,25 @@ const HeroSection = () => {
       <section id="home" className="relative overflow-hidden bg-background md:min-h-screen md:flex md:items-center">
 
         {/* MOBILE: imagem topo largura total */}
-        <div
-          className="md:hidden relative w-full h-[58vh] flex-shrink-0"
-          style={{ opacity: imgVisible ? 1 : 0, transition: `opacity ${FADE_DURATION}ms ease` }}
-        >
+        <div className="md:hidden relative w-full h-[58vh] flex-shrink-0">
+          {nextIdx !== null && (
+            <img
+              src={slides[nextIdx]}
+              alt=""
+              aria-hidden
+              width={1280}
+              height={960}
+              className="absolute inset-0 w-full h-full object-cover object-center"
+              style={{ opacity: incomingVisible ? 1 : 0, transition: `opacity ${FADE_DURATION}ms ease` }}
+            />
+          )}
           <img
             src={slides[current]}
             alt="Infrastructure engineering project"
             width={1280}
             height={960}
-            className="w-full h-full object-cover object-center"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+            style={{ opacity: nextIdx !== null ? 0 : 1, transition: `opacity ${FADE_DURATION}ms ease` }}
           />
           {/* Gradiente base — funde com o conteúdo abaixo */}
           <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-transparent to-background" />
@@ -220,16 +239,25 @@ const HeroSection = () => {
         </div>
 
         {/* DESKTOP: imagem lado direito absoluta */}
-        <div
-          className="hidden md:block absolute right-0 top-0 w-[58%] h-full"
-          style={{ opacity: imgVisible ? 1 : 0, transition: `opacity ${FADE_DURATION}ms ease` }}
-        >
+        <div className="hidden md:block absolute right-0 top-0 w-[58%] h-full">
+          {nextIdx !== null && (
+            <img
+              src={slides[nextIdx]}
+              alt=""
+              aria-hidden
+              width={1920}
+              height={1080}
+              className="absolute inset-0 w-full h-full object-cover object-center"
+              style={{ opacity: incomingVisible ? 1 : 0, transition: `opacity ${FADE_DURATION}ms ease` }}
+            />
+          )}
           <img
             src={slides[current]}
             alt="Infrastructure engineering project"
             width={1920}
             height={1080}
-            className="w-full h-full object-cover object-center"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+            style={{ opacity: nextIdx !== null ? 0 : 1, transition: `opacity ${FADE_DURATION}ms ease` }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/55 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/50" />
