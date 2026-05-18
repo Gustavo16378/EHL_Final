@@ -158,10 +158,10 @@ const PortfolioSection = () => {
       </div>
 
       <Dialog open={!!selectedProject} onOpenChange={() => setSelectedProject(null)}>
-        <DialogContent className="max-w-3xl bg-card border-border p-0 overflow-hidden">
+        <DialogContent className="max-w-3xl w-[calc(100%-2rem)] sm:w-full bg-card border-border p-0 flex flex-col max-h-[90dvh] overflow-hidden">
           {selectedProject && (
             <>
-              <div className="relative h-64 sm:h-80 bg-card/50">
+              <div className="relative h-48 sm:h-72 flex-shrink-0 bg-card/50">
                 {selectedProject.image ? (
                   <img
                     src={selectedProject.image}
@@ -177,9 +177,9 @@ const PortfolioSection = () => {
                   <span className="text-muted-foreground text-xs ml-2">— {selectedProject.location}</span>
                 </div>
               </div>
-              <div className="p-6 sm:p-8">
+              <div className="overflow-y-auto p-6 sm:p-8">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl sm:text-3xl font-light text-foreground">
+                  <DialogTitle className="text-xl sm:text-3xl font-light text-foreground">
                     {selectedProject.title}
                   </DialogTitle>
                   <DialogDescription className="text-silver font-light leading-relaxed mt-3">
