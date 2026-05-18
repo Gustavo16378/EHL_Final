@@ -3,10 +3,10 @@
 FROM node:20-bookworm-slim AS build
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
 
-COPY . .
+COPY frontend/ .
 
 ARG VITE_CMS_URL
 ENV VITE_CMS_URL=${VITE_CMS_URL}

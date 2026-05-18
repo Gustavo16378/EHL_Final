@@ -13,7 +13,7 @@ dist-ssr
 *.local
 
 # Strapi CMS (repo separado)
-cms/
+backend/
 
 # Editor directories and files
 .vscode/*

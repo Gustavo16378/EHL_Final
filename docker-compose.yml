@@ -10,7 +10,7 @@ services:
 
   cms:
     build:
-      context: ./cms
+      context: ./backend
       dockerfile: Dockerfile
     depends_on:
       - db
