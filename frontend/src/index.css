@@ -38,19 +38,21 @@
   }
 }
 
-/* Scrollbar personalizada */
-::-webkit-scrollbar {
-  width: 3px;
-}
-::-webkit-scrollbar-track {
-  background: hsl(220 8% 13%);
-}
-::-webkit-scrollbar-thumb {
-  background: hsl(46 98% 53%);
-  border-radius: 0;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(46 98% 65%);
+/* Scrollbar personalizada — apenas desktop */
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 3px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(220 8% 13%);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(46 98% 53%);
+    border-radius: 0;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(46 98% 65%);
+  }
 }
 
 @layer utilities {

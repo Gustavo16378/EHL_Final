@@ -186,7 +186,7 @@ const HeroSection = () => {
       <section id="home" className="relative overflow-hidden bg-background md:min-h-screen md:flex md:items-center">
 
         {/* MOBILE: imagem topo largura total */}
-        <div className="md:hidden relative w-full h-[58vh] flex-shrink-0">
+        <div className="md:hidden relative w-full h-[58vh] flex-shrink-0 overflow-hidden isolate">
           {slides.map((src, i) => (
             <img
               key={src}
