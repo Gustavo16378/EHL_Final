@@ -186,7 +186,7 @@ const HeroSection = () => {
       <section id="home" className="relative overflow-hidden bg-background md:min-h-screen md:flex md:items-center">
 
         {/* MOBILE: imagem topo largura total */}
-        <div className="md:hidden relative w-full h-[58vh] flex-shrink-0 overflow-hidden isolate">
+        <div className="md:hidden relative w-full h-[75vh] flex-shrink-0 overflow-hidden isolate">
           {slides.map((src, i) => (
             <img
               key={src}
@@ -202,23 +202,22 @@ const HeroSection = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-transparent to-background" />
           <div className="absolute inset-y-0 right-0 w-3 bg-background" />
           <div className="absolute inset-y-0 left-0 w-3 bg-background" />
-        </div>
-
-        {/* MOBILE: indicadores abaixo da imagem, no fundo sólido */}
-        <div className="md:hidden flex items-center justify-center gap-3 py-3 bg-background">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => goTo(i)}
-              aria-label={`Slide ${i + 1}`}
-              className="h-[2px] rounded-full transition-all duration-300 border-0 outline-none"
-              style={{
-                width: i === current ? '28px' : '12px',
-                background: i === current ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.25)',
-              }}
-            />
-          ))}
+          {/* Indicadores — brancos, sem cor âmbar */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => goTo(i)}
+                aria-label={`Slide ${i + 1}`}
+                className="h-[2px] rounded-full transition-[width,background] duration-300 border-0 outline-none"
+                style={{
+                  width: i === current ? '28px' : '12px',
+                  background: i === current ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.25)',
+                }}
+              />
+            ))}
+          </div>
         </div>
 
         {/* DESKTOP: imagem lado direito absoluta */}
