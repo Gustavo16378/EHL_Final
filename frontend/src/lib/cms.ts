@@ -1,5 +1,5 @@
 // Mock — dados estáticos, sem Strapi
-import portfolioFerroviaNorteSul from '@/assets/portifolio/FerroviaNorteSul.jfif';
+import portfolioFerroviaNorteSul from '@/assets/portifolio/FerroviaNorteSul.jpg';
 import portfolioFerroviaOesteLeste from '@/assets/portifolio/FerroviaOesteLeste.jpg';
 import portfolioPonteFHC from '@/assets/portifolio/PontePresidenteFHC.jpg';
 import portfolioGO139 from '@/assets/portifolio/GO-139.jpg';

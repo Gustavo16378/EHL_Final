@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { DollarSign, CloudSun, PlaySquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import slidePonteFHC from '@/assets/portifolio/PontePresidenteFHC.jpg';
-import slideFerroviaNS from '@/assets/portifolio/FerroviaNorteSul.jfif';
+import slideFerroviaNS from '@/assets/portifolio/FerroviaNorteSul.jpg';
 import slideConsorcioPontes from '@/assets/ConsorcioPontes.jpeg';
 import slideAlphaville from '@/assets/portifolio/AlphavillePalmas.jpg';
 import slideGO139 from '@/assets/portifolio/GO-139.jpg';
