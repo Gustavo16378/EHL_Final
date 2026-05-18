@@ -199,8 +199,10 @@ const HeroSection = () => {
               style={{ opacity: i === current ? 1 : 0, transition: `opacity ${FADE_DURATION}ms ease-in-out` }}
             />
           ))}
-          {/* Gradiente base — funde com o conteúdo abaixo */}
+          {/* Gradientes: funde com conteúdo abaixo + cobre bordas laterais */}
           <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-transparent to-background" />
+          <div className="absolute inset-y-0 right-0 w-3 bg-background" />
+          <div className="absolute inset-y-0 left-0 w-3 bg-background" />
           {/* Indicadores sobre a imagem no mobile */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20">
             {slides.map((_, i) => (
