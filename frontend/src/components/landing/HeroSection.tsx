@@ -328,7 +328,8 @@ const HeroSection = () => {
   return (
     <>
       {/* HERO — carrossel full-width, protagonista */}
-      <section id="home" className="relative overflow-hidden bg-background h-[58vh] md:h-[85vh]">
+      {/* mt-[72px] = altura do header fixo, pra imagem começar abaixo da navbar sólida */}
+      <section id="home" className="relative overflow-hidden bg-background mt-[72px] h-[58vh] md:h-[85vh]">
         <h1 className="sr-only">EHL — Eletro Hidro Ltda. — Engenharia e infraestrutura no Brasil</h1>
         {slides.map((slide, i) => (
           <img
