@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import equipmentBg from '@/assets/equipment-machinery.jpg';
 import { useTranslation } from 'react-i18next';
 import { fetchCollection, fetchSingle, getCmsImageUrl, resolveLocale } from '@/lib/cms';
@@ -90,7 +90,7 @@ const EquipamentsSection = () => {
   const headerSubtitle = cmsPage?.subtitle || t('equipments.subtitle');
 
   return (
-    <main className="min-h-screen py-32 relative">
+    <section className="min-h-screen py-32 relative">
       <div className="absolute inset-0 opacity-5">
         <img src={equipmentBg} alt="" className="w-full h-full object-cover" loading="lazy" width={1280} height={960} />
       </div>
@@ -118,7 +118,11 @@ const EquipamentsSection = () => {
             {equipamentos.map((equip) => (
               <div
                 key={equip.id}
+                role="button"
+                tabIndex={0}
+                aria-label={equip.nome}
                 onClick={() => setSelected(equip)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(equip); } }}
                 className="cursor-pointer group rounded-lg border border-border bg-card/80 hover:border-primary/40 transition-all duration-500 hover:-translate-y-1 overflow-hidden"
               >
                 <div className="relative h-52 overflow-hidden bg-card/50">
@@ -176,7 +180,7 @@ const EquipamentsSection = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
                   <div className="absolute bottom-4 left-6 right-6">
                     <span className="text-xs font-medium tracking-wider uppercase text-primary mb-2 block">{selected.categoria}</span>
-                    <h2 className="text-2xl font-light text-foreground leading-snug">{selected.nome}</h2>
+                    <DialogTitle className="text-2xl font-light text-foreground leading-snug">{selected.nome}</DialogTitle>
                   </div>
                 </div>
                 <div className="p-6 space-y-5">
@@ -193,7 +197,7 @@ const EquipamentsSection = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </main>
+    </section>
   );
 };
 

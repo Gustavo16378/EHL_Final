@@ -515,6 +515,45 @@ const PORTFOLIO: Record<string, MockEntity<Record<string, unknown>>[]> = {
   ],
 };
 
+// ---------------------------------------------------------------------------
+// Hero — slides curados do carrossel (legenda + rota por slide)
+// ---------------------------------------------------------------------------
+export type HeroSlide = {
+  id: number;
+  image: string;
+  title: string;
+  location: string;
+  category: string;
+  href: string;
+};
+
+export const HERO_SLIDES: Record<string, HeroSlide[]> = {
+  pt: [
+    { id: 1, image: portfolioPonteFHC, title: 'Ponte Presidente FHC', location: 'Palmas / Paraíso do Tocantins — TO', category: 'Obras de Arte Especiais', href: '/portfolio' },
+    { id: 2, image: portfolioFerroviaNorteSul, title: 'Ferrovia Norte-Sul — Lote 14', location: 'Tocantins', category: 'Ferrovia Federal', href: '/portfolio' },
+    { id: 3, image: obraConsorcioPontes, title: 'Consórcio Pontes — Ponte Gov. Siqueira Campos', location: 'Palmas — TO', category: 'Em andamento · Entrega Dez/2026', href: '/ConstructionsPage' },
+    { id: 4, image: portfolioAlphavillePalmas, title: 'Alphaville Palmas 1 e 2', location: 'Palmas — TO', category: 'Desenvolvimento Urbano Privado', href: '/portfolio' },
+    { id: 5, image: portfolioGO139, title: 'Pro-Município — 139 Municípios', location: 'Estado do Tocantins', category: 'Manutenção Rodoviária', href: '/portfolio' },
+  ],
+  en: [
+    { id: 1, image: portfolioPonteFHC, title: 'President FHC Bridge', location: 'Palmas / Paraíso do Tocantins — TO', category: 'Special Structures', href: '/portfolio' },
+    { id: 2, image: portfolioFerroviaNorteSul, title: 'North-South Railway — Lot 14', location: 'Tocantins', category: 'Federal Railway', href: '/portfolio' },
+    { id: 3, image: obraConsorcioPontes, title: 'Bridge Consortium — Gov. Siqueira Campos Bridge', location: 'Palmas — TO', category: 'In progress · Delivery Dec/2026', href: '/ConstructionsPage' },
+    { id: 4, image: portfolioAlphavillePalmas, title: 'Alphaville Palmas 1 and 2', location: 'Palmas — TO', category: 'Private Urban Development', href: '/portfolio' },
+    { id: 5, image: portfolioGO139, title: 'Pro-Município — 139 Municipalities', location: 'State of Tocantins', category: 'Road Maintenance', href: '/portfolio' },
+  ],
+  es: [
+    { id: 1, image: portfolioPonteFHC, title: 'Puente Pdte. FHC', location: 'Palmas / Paraíso do Tocantins — TO', category: 'Obras de Arte Especiales', href: '/portfolio' },
+    { id: 2, image: portfolioFerroviaNorteSul, title: 'Ferrocarril Norte-Sur — Lote 14', location: 'Tocantins', category: 'Ferrocarril Federal', href: '/portfolio' },
+    { id: 3, image: obraConsorcioPontes, title: 'Consorcio Puentes — Puente Gov. Siqueira Campos', location: 'Palmas — TO', category: 'En ejecución · Entrega Dic/2026', href: '/ConstructionsPage' },
+    { id: 4, image: portfolioAlphavillePalmas, title: 'Alphaville Palmas 1 y 2', location: 'Palmas — TO', category: 'Desarrollo Urbano Privado', href: '/portfolio' },
+    { id: 5, image: portfolioGO139, title: 'Pro-Município — 139 Municipios', location: 'Estado de Tocantins', category: 'Mantenimiento Vial', href: '/portfolio' },
+  ],
+};
+
+export const getHeroSlides = (locale: string): HeroSlide[] =>
+  HERO_SLIDES[locale] ?? HERO_SLIDES.pt;
+
 const COLLECTIONS: Record<string, Record<string, MockEntity<Record<string, unknown>>[]>> = {
   equipments: EQUIPAMENTOS as any,
   constructions: OBRAS as any,

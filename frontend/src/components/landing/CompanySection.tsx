@@ -1,5 +1,5 @@
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { Shield, Target, Award, Users, CheckCircle } from 'lucide-react';
+import { Shield, Target, Users, CheckCircle } from 'lucide-react';
 import companyImage from '@/assets/company-office.jpg';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
@@ -53,17 +53,12 @@ const CompanySection = () => {
     };
   }, [i18n.language, refetchTick]);
   
-  let quality: string[] = [
+  const qualityItems: string[] = [
     cmsPage?.licensing || t('company.licensing'),
     cmsPage?.safety || t('company.safety'),
   ];
 
-  const qualityItems = [
-    quality[0],
-    quality[1],
-  ];
-
-  let label: string[] = [t('company.years'), t('company.delivered'), t('company.level'), t('company.collaborators')];
+  const label: string[] = [t('company.years'), t('company.delivered'), t('company.level'), t('company.collaborators')];
 
   const stats = [
     { icon: Shield, value: cmsPage?.yearsValue || '25+', label: label[0] },
@@ -78,11 +73,11 @@ const CompanySection = () => {
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className={`transition-all duration-1000 ${isVisible ? 'animate-slide-left opacity-100' : 'opacity-0'}`}>
             <div className="w-12 h-[2px] gradient-red-line mb-6" />
-            <h2 className="text-4xl sm:text-5xl font-extralight text-foreground mb-8 leading-tight">
+            <h1 className="text-4xl sm:text-5xl font-extralight text-foreground mb-8 leading-tight">
               {cmsPage?.title1 || t('company.title1')}
               <br />
               <span className="font-light text-primary">{cmsPage?.title2 || t('company.title2')}</span>
-            </h2>
+            </h1>
             <p className="text-silver text-lg font-light leading-relaxed mb-6">
               {cmsPage?.p1 || t('company.p1')}
             </p>
@@ -104,7 +99,7 @@ const CompanySection = () => {
             <div className="relative rounded-lg overflow-hidden">
               <img
                 src={getCmsImageUrl(cmsPage?.companyImage?.[0]) || companyImage}
-                alt="EHL corporate headquarters"
+                alt={t('company.imageAlt')}
                 width={1280}
                 height={960}
                 loading="lazy"

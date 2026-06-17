@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Globe, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +28,7 @@ const Header = () => {
   const [langOpen, setLangOpen] = useState(false);
   const [cmsGlobal, setCmsGlobal] = useState<CmsGlobalConfig | null>(null);
   const langRef = useRef<HTMLDivElement>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -49,8 +50,15 @@ const Header = () => {
     const handleClick = (e: MouseEvent) => {
       if (!langRef.current?.contains(e.target as Node)) setLangOpen(false);
     };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLangOpen(false);
+    };
     document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('keydown', handleKey);
+    };
   }, [langOpen]);
 
   useEffect(() => {
@@ -63,6 +71,19 @@ const Header = () => {
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
+
+  // Drawer: fica inerte (não focável/tabável por leitor de tela) quando fechado e fecha no Escape
+  useEffect(() => {
+    const el = drawerRef.current;
+    if (el) {
+      if (mobileOpen) el.removeAttribute('inert');
+      else el.setAttribute('inert', '');
+    }
+    if (!mobileOpen) return;
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileOpen(false); };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
   }, [mobileOpen]);
 
   const scrollDirection = useScrollDirection();
@@ -91,17 +112,22 @@ const Header = () => {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled ? 'bg-background border-b border-border' : 'bg-transparent'
-        } ${hidden ? '-translate-y-full' : 'translate-y-0'}`}
+        className={`fixed top-0 left-0 right-0 z-50 bg-background border-b border-border transition-transform duration-500 ${
+          hidden ? '-translate-y-full' : 'translate-y-0'
+        }`}
       >
         <div className="container mx-auto flex items-center justify-between py-4 px-6">
           <Link to="/" className="flex items-center gap-3">
-            <img
-              src={logoUrl ?? ehlLogo}
-              alt="EHL - Eletro Hidro Ltda."
-              className="h-10 w-auto"
-            />
+            <span
+              className="logo-shine"
+              style={{ '--logo-src': `url(${logoUrl ?? ehlLogo})` } as CSSProperties}
+            >
+              <img
+                src={logoUrl ?? ehlLogo}
+                alt="EHL - Eletro Hidro Ltda."
+                className="h-10 w-auto block"
+              />
+            </span>
             <span className="text-foreground font-light text-sm tracking-[0.2em] uppercase">
               {companyName}
             </span>
@@ -133,6 +159,9 @@ const Header = () => {
             <div ref={langRef} className="relative">
               <button
                 onClick={() => setLangOpen((v) => !v)}
+                aria-haspopup="menu"
+                aria-expanded={langOpen}
+                aria-label="Selecionar idioma"
                 className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Globe size={14} />
@@ -190,6 +219,11 @@ const Header = () => {
 
       {/* Drawer — desliza da direita, acima do backdrop e do header */}
       <div
+        ref={drawerRef}
+        role="dialog"
+        aria-modal={mobileOpen}
+        aria-label="Menu de navegação"
+        aria-hidden={!mobileOpen}
         className={`lg:hidden fixed top-0 right-0 h-full w-72 bg-background border-l border-border z-[52] transition-transform duration-300 ease-in-out flex flex-col ${
           mobileOpen ? 'translate-x-0' : 'translate-x-full'
         }`}

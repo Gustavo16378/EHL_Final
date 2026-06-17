@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { MapPin, Calendar, User } from 'lucide-react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useTranslation } from 'react-i18next';
 import { fetchCollection, fetchSingle, getCmsImageUrl, resolveLocale } from '@/lib/cms';
 import { useRefetchOnFocus } from '@/hooks/useRefetchOnFocus';
@@ -108,7 +108,7 @@ const ObrasSection = () => {
   const labelForecast = cmsPage?.labelForecast || t('constructions.labels.forecast');
 
   return (
-    <main className="min-h-screen py-32">
+    <section className="min-h-screen py-32">
       <div className="container mx-auto px-6" ref={ref}>
         <div className={`text-center max-w-3xl mx-auto mb-20 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="w-12 h-[2px] gradient-red-line mx-auto mb-6" />
@@ -120,18 +120,22 @@ const ObrasSection = () => {
 
         {loading ? (
           <div className="text-center py-16 text-muted-foreground text-sm font-light">
-            Carregando...
+            {t('constructions.loading')}
           </div>
         ) : obras.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground text-sm font-light">
-            Nenhuma obra cadastrada no momento.
+            {t('constructions.empty')}
           </div>
         ) : (
           <div className={`grid md:grid-cols-2 xl:grid-cols-3 gap-8 transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             {obras.map((obra) => (
               <div
                 key={obra.id}
+                role="button"
+                tabIndex={0}
+                aria-label={obra.nome}
                 onClick={() => setSelected(obra)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(obra); } }}
                 className="cursor-pointer group flex flex-col rounded-lg border border-border bg-card/80 hover:border-primary/40 transition-all duration-500 hover:-translate-y-1 overflow-hidden"
               >
                 <div className="relative h-48 overflow-hidden bg-card/50">
@@ -200,7 +204,7 @@ const ObrasSection = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
                   <div className="absolute bottom-4 left-6 right-6">
                     <span className="text-xs font-medium tracking-wider uppercase text-primary mb-2 block">{selected.tipo}</span>
-                    <h2 className="text-2xl font-light text-foreground leading-snug">{selected.nome}</h2>
+                    <DialogTitle className="text-2xl font-light text-foreground leading-snug">{selected.nome}</DialogTitle>
                   </div>
                 </div>
                 <div className="p-6 space-y-5">
@@ -240,7 +244,7 @@ const ObrasSection = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </main>
+    </section>
   );
 };
 

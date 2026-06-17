@@ -105,9 +105,9 @@ const PortfolioSection = () => {
         <div className={`flex flex-col sm:flex-row sm:items-end justify-between mb-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div>
             <div className="w-12 h-[2px] gradient-red-line mb-6" />
-            <h2 className="text-4xl sm:text-5xl font-extralight text-foreground">
+            <h1 className="text-4xl sm:text-5xl font-extralight text-foreground">
               {headerTitle1} <span className="text-primary font-light">{headerTitle2}</span>
-            </h2>
+            </h1>
           </div>
           <p className="text-silver font-light mt-4 sm:mt-0 max-w-sm">{headerSubtitle}</p>
         </div>
@@ -125,7 +125,11 @@ const PortfolioSection = () => {
             {projects.map((project, i) => (
               <div
                 key={project.id}
+                role="button"
+                tabIndex={0}
+                aria-label={project.title}
                 onClick={() => setSelectedProject(project)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedProject(project); } }}
                 className={`group relative rounded-lg overflow-hidden cursor-pointer bg-card/50 ${i === 0 ? 'md:row-span-2 min-h-[500px]' : 'min-h-[240px]'}`}
               >
                 {project.image ? (

@@ -67,3 +67,52 @@ html { scrollbar-width: none; -ms-overflow-style: none; }
     @apply bg-gradient-to-r from-primary to-transparent;
   }
 }
+
+/* Brilho "diamante" varrendo a logo da direita para a esquerda.
+   O brilho é recortado no formato da logo via mask (--logo-src vem inline). */
+.logo-shine {
+  position: relative;
+  display: inline-block;
+}
+
+.logo-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.85) 50%,
+    transparent 60%
+  );
+  background-repeat: no-repeat;
+  background-size: 220% 100%;
+  background-position: -25% 0; /* fora da tela, à direita */
+  -webkit-mask-image: var(--logo-src);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  mask-image: var(--logo-src);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  animation: logo-shine 10s ease-in-out infinite;
+}
+
+@keyframes logo-shine {
+  0%  { background-position: -25% 0; }  /* invisível, à direita */
+  8%  { background-position: 130% 0; }  /* varre até a esquerda (~0.8s) */
+  100% { background-position: 130% 0; } /* pausa o resto do ciclo */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-shine::after { animation: none; }
+}
+
+/* Foco visível global (tema escuro) — navegação por teclado fica clara */
+:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+  border-radius: 2px;
+}

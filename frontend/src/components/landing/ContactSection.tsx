@@ -88,9 +88,9 @@ const ContactSection = () => {
         <div className={`transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="text-center max-w-2xl mx-auto mb-20">
             <div className="w-12 h-[2px] gradient-red-line mx-auto mb-6" />
-            <h2 className="text-4xl sm:text-5xl font-extralight text-foreground mb-6">
+            <h1 className="text-4xl sm:text-5xl font-extralight text-foreground mb-6">
               {headerTitle1} <span className="text-primary font-light">{headerTitle2}</span>
-            </h2>
+            </h1>
             <p className="text-silver font-light text-lg">
               {headerSubtitle}
             </p>

@@ -26,9 +26,6 @@ const resources = {
           video: "Vídeo",
           videoTitle: "Vídeo institucional",
           videoUnavailable: "Vídeo indisponível.",
-          videoExpand: "Expandir",
-          videoCollapse: "Recolher",
-          usd: "Dólar (USD → BRL)",
           weather: "Tempo agora",
           todayRange: "Hoje",
           rain: "Chuva",
@@ -38,7 +35,25 @@ const resources = {
           loading: "Carregando…",
           usdError: "Não foi possível carregar a cotação agora.",
           weatherNoLocation: "Permita a localização para ver o clima.",
-          weatherError: "Não foi possível carregar o clima agora."
+          weatherError: "Não foi possível carregar o clima agora.",
+          exchange: "Câmbio",
+          wind: "Vento",
+          forecast: "Próximos dias",
+          feelsLike: "Sensação",
+          humidity: "Umidade",
+          conditions: {
+            clear: "Céu limpo",
+            partlyCloudy: "Parcialmente nublado",
+            cloudy: "Nublado",
+            fog: "Neblina",
+            drizzle: "Garoa",
+            rain: "Chuva",
+            snow: "Neve",
+            thunderstorm: "Tempestade"
+          }
+        },
+        caption: {
+          viewWork: "Ver obra"
         }
       },
       company: {
@@ -53,7 +68,8 @@ const resources = {
         years: "Anos de Experiência",
         delivered: "Obras Entregues",
         level: "Nível A",
-        collaborators: "Colaboradores"
+        collaborators: "Colaboradores",
+        imageAlt: "Sede da EHL — Eletro Hidro Ltda."
       },
 
       equipments: {
@@ -101,6 +117,11 @@ const resources = {
         title1: "Obras",
         title2: " em Andamento",
         subtitle: "Acompanhe os projetos que a EHL está executando neste momento — engenharia pesada com excelência em todo o Brasil.",
+        inProgressTitle: "Obras em andamento",
+        viewAll: "Ver todas",
+        delivery: "Entrega",
+        loading: "Carregando…",
+        empty: "Nenhuma obra cadastrada no momento.",
         labels: {
           location: "Localização",
           client: "Cliente",
@@ -280,9 +301,6 @@ const resources = {
           video: "Video",
           videoTitle: "Institutional video",
           videoUnavailable: "Video unavailable.",
-          videoExpand: "Expand",
-          videoCollapse: "Collapse",
-          usd: "US Dollar (USD → BRL)",
           weather: "Weather now",
           todayRange: "Today",
           rain: "Rain",
@@ -292,9 +310,26 @@ const resources = {
           loading: "Loading…",
           usdError: "Couldn't load the exchange rate right now.",
           weatherNoLocation: "Allow location access to see weather.",
-          weatherError: "Couldn't load the weather right now."
+          weatherError: "Couldn't load the weather right now.",
+          exchange: "Exchange",
+          wind: "Wind",
+          forecast: "Next days",
+          feelsLike: "Feels like",
+          humidity: "Humidity",
+          conditions: {
+            clear: "Clear sky",
+            partlyCloudy: "Partly cloudy",
+            cloudy: "Cloudy",
+            fog: "Fog",
+            drizzle: "Drizzle",
+            rain: "Rain",
+            snow: "Snow",
+            thunderstorm: "Thunderstorm"
+          }
+        },
+        caption: {
+          viewWork: "View work"
         }
-
       },
       company: {
         title1: "Heritage &",
@@ -308,7 +343,8 @@ const resources = {
         years: "Years of Experience",
         delivered: "Projects Delivered",
         level: "Level A",
-        collaborators: "Collaborators"
+        collaborators: "Collaborators",
+        imageAlt: "EHL — Eletro Hidro Ltda. headquarters"
       },
 
       equipments: {
@@ -357,6 +393,11 @@ const resources = {
         title1: "Projects",
         title2: " in Progress",
         subtitle: "Follow the projects EHL is currently executing — heavy engineering with excellence across Brazil.",
+        inProgressTitle: "Projects in progress",
+        viewAll: "View all",
+        delivery: "Delivery",
+        loading: "Loading…",
+        empty: "No projects registered at the moment.",
         labels: {
           location: "Location",
           client: "Client",
@@ -537,9 +578,6 @@ const resources = {
           video: "Video",
           videoTitle: "Video institucional",
           videoUnavailable: "Video no disponible.",
-          videoExpand: "Expandir",
-          videoCollapse: "Contraer",
-          usd: "Dólar (USD → BRL)",
           weather: "Tiempo ahora",
           todayRange: "Hoy",
           rain: "Lluvia",
@@ -549,9 +587,26 @@ const resources = {
           loading: "Cargando…",
           usdError: "No se pudo cargar la cotización ahora.",
           weatherNoLocation: "Permite la ubicación para ver el clima.",
-          weatherError: "No se pudo cargar el clima ahora."
+          weatherError: "No se pudo cargar el clima ahora.",
+          exchange: "Cambio",
+          wind: "Viento",
+          forecast: "Próximos días",
+          feelsLike: "Sensación",
+          humidity: "Humedad",
+          conditions: {
+            clear: "Cielo despejado",
+            partlyCloudy: "Parcialmente nublado",
+            cloudy: "Nublado",
+            fog: "Niebla",
+            drizzle: "Llovizna",
+            rain: "Lluvia",
+            snow: "Nieve",
+            thunderstorm: "Tormenta"
+          }
+        },
+        caption: {
+          viewWork: "Ver obra"
         }
-
       },
       company: {
         title1: "Historia &",
@@ -565,7 +620,8 @@ const resources = {
         years: "Años de Experiencia",
         delivered: "Obras Entregadas",
         level: "Nivel A",
-        collaborators: "Colaboradores"
+        collaborators: "Colaboradores",
+        imageAlt: "Sede de EHL — Eletro Hidro Ltda."
       },
       equipments: {
         title1: "Nuestros ",
@@ -612,6 +668,11 @@ const resources = {
         title1: "Obras",
         title2: " en Ejecución",
         subtitle: "Sigue los proyectos que EHL está ejecutando ahora — ingeniería pesada con excelencia en todo Brasil.",
+        inProgressTitle: "Obras en ejecución",
+        viewAll: "Ver todas",
+        delivery: "Entrega",
+        loading: "Cargando…",
+        empty: "Ninguna obra registrada por el momento.",
         labels: {
           location: "Ubicación",
           client: "Cliente",
@@ -770,15 +831,38 @@ const resources = {
   }
 };
 
+const LANG_TAGS: Record<string, string> = { pt: 'pt-BR', en: 'en', es: 'es' };
+const SUPPORTED = ['pt', 'en', 'es'];
+
+const readStoredLang = (): string => {
+  try {
+    const v = localStorage.getItem('ehl-lang');
+    if (v && SUPPORTED.includes(v)) return v;
+  } catch { /* localStorage indisponível */ }
+  return 'pt';
+};
+
 i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'pt', // idioma padrão
+    lng: readStoredLang(), // idioma padrão (persistido entre sessões)
     fallbackLng: 'pt',
     interpolation: {
       escapeValue: false
     }
   });
+
+// Mantém <html lang> em sincronia com o idioma ativo e persiste a escolha do usuário.
+const applyLang = (lng: string) => {
+  if (typeof document !== 'undefined') {
+    document.documentElement.lang = LANG_TAGS[lng] || lng;
+  }
+};
+applyLang(i18n.language);
+i18n.on('languageChanged', (lng) => {
+  applyLang(lng);
+  try { localStorage.setItem('ehl-lang', lng); } catch { /* ignore */ }
+});
 
 export default i18n;
