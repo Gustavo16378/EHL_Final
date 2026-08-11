@@ -721,7 +721,7 @@ const Sparkline = ({ data, localeTag }: { data: HistoryPoint[]; localeTag: strin
 
       {hover !== null && (
         <div
-          className="pointer-events-none absolute -top-1 z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded border border-border/70 bg-card px-1.5 py-0.5 text-[11px] tabular-nums text-silver shadow-lg"
+          className="pointer-events-none absolute -top-1 z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded border border-border/70 bg-card px-1.5 py-0.5 text-xs tabular-nums text-silver shadow-lg"
           // Preso entre 12% e 88% p/ a caixa não vazar a borda do card nas pontas.
           style={{ left: `${Math.min(88, Math.max(12, xPct(hover)))}%` }}
         >
