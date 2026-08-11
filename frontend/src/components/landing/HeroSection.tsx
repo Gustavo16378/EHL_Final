@@ -48,7 +48,12 @@ type WeatherState =
       forecast: ForecastDay[];
       updatedAt: Date;
     }
-  | { status: 'error' | 'no-location' };
+  | { status: 'error' };
+
+// Sede da EHL — Palmas/TO. O clima exibido é o da praça onde a empresa opera,
+// não o de quem visita: é informação institucional, e não depende de o
+// navegador conceder (ou negar) permissão de localização.
+const PALMAS_TO = { latitude: -10.1842, longitude: -48.3339 } as const;
 
 const getYouTubeVideoId = (url: string) => {
   try {
@@ -102,7 +107,6 @@ const HeroSection = () => {
   const [constructionsLoading, setConstructionsLoading] = useState(true);
 
   const [exchange, setExchange] = useState<ExchangeState>({ status: 'idle' });
-  const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [weather, setWeather] = useState<WeatherState>({ status: 'idle' });
 
   const youtubeVideoId = useMemo(() => getYouTubeVideoId(VIDEO_URL), []);
@@ -234,30 +238,16 @@ const HeroSection = () => {
     return () => { isMounted = false; abortController.abort(); window.clearInterval(id); };
   }, []);
 
-  // --- Geolocalização ---
+  // --- Clima de Palmas/TO (com vento e previsão de 2 dias) ---
   useEffect(() => {
-    if (!navigator.geolocation) {
-      setWeather({ status: 'no-location' });
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => setCoords({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
-      () => setWeather({ status: 'no-location' }),
-      { enableHighAccuracy: false, timeout: 10_000, maximumAge: 30 * 60 * 1000 },
-    );
-  }, []);
-
-  // --- Clima (com vento e previsão de 2 dias) ---
-  useEffect(() => {
-    if (!coords) return;
     let isMounted = true;
     const abortController = new AbortController();
     const fetchWeather = async () => {
       setWeather((prev) => (prev.status === 'ready' ? prev : { status: 'loading' }));
       try {
         const url = new URL('https://api.open-meteo.com/v1/forecast');
-        url.searchParams.set('latitude', String(coords.latitude));
-        url.searchParams.set('longitude', String(coords.longitude));
+        url.searchParams.set('latitude', String(PALMAS_TO.latitude));
+        url.searchParams.set('longitude', String(PALMAS_TO.longitude));
         url.searchParams.set('current', 'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m');
         url.searchParams.set('daily', 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum');
         url.searchParams.set('timezone', 'auto');
@@ -321,7 +311,7 @@ const HeroSection = () => {
     fetchWeather();
     const id = window.setInterval(fetchWeather, 10 * 60 * 1000);
     return () => { isMounted = false; abortController.abort(); window.clearInterval(id); };
-  }, [coords, locale]);
+  }, [locale]);
 
   const activeSlide = slides[current] ?? slides[0];
 
@@ -560,8 +550,6 @@ const HeroSection = () => {
                       </div>
                     )}
                   </>
-                ) : weather.status === 'no-location' ? (
-                  <p className="text-sm text-silver font-light">{t('hero.widgets.weatherNoLocation')}</p>
                 ) : weather.status === 'error' ? (
                   <p className="text-sm text-silver font-light">{t('hero.widgets.weatherError')}</p>
                 ) : (
