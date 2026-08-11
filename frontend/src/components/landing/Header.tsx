@@ -103,7 +103,10 @@ const Header = () => {
       {/* Sempre visível: o header não se esconde ao rolar. */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
         <div className="container mx-auto flex items-center justify-between py-4 px-6">
-          <Link to="/" className="flex items-center gap-3">
+          {/* Laterais com flex-1 (larguras iguais) para o nav ficar centrado de
+              verdade. Com justify-between puro ele era empurrado ~60px à direita,
+              porque o bloco do logo é mais largo que o de ações. */}
+          <Link to="/" className="flex flex-1 min-w-0 items-center gap-3">
             <span
               className="logo-shine"
               style={{ '--logo-src': `url(${logoUrl ?? ehlLogo})` } as CSSProperties}
@@ -119,7 +122,7 @@ const Header = () => {
             </span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-8">
+          <nav className="hidden lg:flex shrink-0 items-center gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.to}
@@ -140,7 +143,7 @@ const Header = () => {
             ))}
           </nav>
 
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden lg:flex flex-1 items-center justify-end gap-4">
             {/* Language switcher — desktop */}
             <div ref={langRef} className="relative">
               <button
