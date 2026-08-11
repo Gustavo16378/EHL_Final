@@ -8,7 +8,7 @@ type StrapiResponse<TData> = {
   meta?: unknown;
 };
 
-class CmsRequestError extends Error {
+export class CmsRequestError extends Error {
   status: number;
   url: string;
   body?: string;
@@ -22,10 +22,33 @@ class CmsRequestError extends Error {
   }
 }
 
-const CMS_URL = (import.meta as any).env?.VITE_CMS_URL as string | undefined;
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 horas
+const RAW_CMS_URL = import.meta.env?.VITE_CMS_URL;
+const FALLBACK_CMS_URL = 'http://localhost:1337';
 
-export const getCmsBaseUrl = () => CMS_URL ?? 'http://localhost:1337';
+// Cache curto: conteúdo publicado no Strapi aparece rápido. O cache existe para
+// a primeira pintura ser instantânea, não para segurar conteúdo velho — toda
+// leitura servida do cache dispara revalidação em segundo plano.
+const CACHE_TTL_MS = 5 * 60 * 1000;
+// Só é usado quando o CMS está fora do ar: evita a tela vazia.
+const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+// Suba este número ao mudar o formato do que é gravado no cache.
+const CACHE_VERSION = 2;
+
+// `??` deixaria passar string vazia — que é exatamente o que um
+// `docker build` sem `--build-arg VITE_CMS_URL` injeta no bundle.
+const CMS_URL =
+  typeof RAW_CMS_URL === 'string' && RAW_CMS_URL.trim() ? RAW_CMS_URL.trim() : FALLBACK_CMS_URL;
+
+if (import.meta.env?.PROD && CMS_URL === FALLBACK_CMS_URL) {
+  // Erro visível em produção: sem isto o site publica apontando para a máquina
+  // do visitante e falha em silêncio, com a tela caindo nos textos de fallback.
+  console.error(
+    '[cms] VITE_CMS_URL não foi definida no build. O site vai tentar falar com ' +
+      `${FALLBACK_CMS_URL} e nenhum conteúdo do CMS será carregado.`
+  );
+}
+
+export const getCmsBaseUrl = () => CMS_URL;
 
 export const resolveLocale = (language: string | undefined) => {
   const value = (language ?? 'pt').toLowerCase();
@@ -35,8 +58,12 @@ export const resolveLocale = (language: string | undefined) => {
   return 'pt';
 };
 
+/** Monta a URL preservando um eventual subcaminho da base (ex.: https://host/cms). */
 const buildUrl = (path: string, params?: Record<string, string | undefined>) => {
-  const url = new URL(path.replace(/^\/+/, '/'), getCmsBaseUrl());
+  const base = new URL(getCmsBaseUrl());
+  const prefixo = base.pathname.replace(/\/+$/, '');
+  const url = new URL(`${prefixo}${path.startsWith('/') ? path : `/${path}`}`, base.origin);
+
   if (params) {
     for (const [key, val] of Object.entries(params)) {
       if (val === undefined || val === '') continue;
@@ -46,40 +73,42 @@ const buildUrl = (path: string, params?: Record<string, string | undefined>) => 
   return url;
 };
 
-// Cache helpers
-const cacheGet = <T>(key: string): T | null => {
+// --- Cache -------------------------------------------------------------------
+
+type CacheEntry<T> = { data: T; ts: number };
+
+const cacheKey = (tipo: string, apiName: string, partes: Array<string | undefined>) =>
+  `cms:v${CACHE_VERSION}:${CMS_URL}:${tipo}:${apiName}:${partes.map((p) => p ?? '').join(':')}`;
+
+const cacheRead = <T>(key: string): CacheEntry<T> | null => {
   try {
     const raw = localStorage.getItem(key);
     if (!raw) return null;
-    const { data, ts } = JSON.parse(raw);
-    if (Date.now() - ts > CACHE_TTL_MS) return null;
-    return data as T;
+    const parsed = JSON.parse(raw) as CacheEntry<T>;
+    if (!parsed || typeof parsed.ts !== 'number') return null;
+    if (Date.now() - parsed.ts > CACHE_MAX_AGE_MS) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return parsed;
   } catch {
     return null;
   }
 };
 
-const cacheSet = (key: string, data: unknown) => {
+const cacheWrite = (key: string, data: unknown) => {
   try {
     localStorage.setItem(key, JSON.stringify({ data, ts: Date.now() }));
   } catch {
-    // localStorage cheio ou bloqueado — ignora silenciosamente
+    // localStorage cheio ou bloqueado — seguir sem cache é aceitável.
   }
 };
 
-const cacheGetStale = <T>(key: string): T | null => {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    const { data } = JSON.parse(raw);
-    return data as T;
-  } catch {
-    return null;
-  }
-};
+// --- HTTP --------------------------------------------------------------------
 
 const fetchJson = async <T>(url: URL): Promise<T> => {
   const res = await fetch(url.toString());
+
   if (!res.ok) {
     let body: string | undefined;
     try {
@@ -87,31 +116,32 @@ const fetchJson = async <T>(url: URL): Promise<T> => {
     } catch {
       body = undefined;
     }
-
-    const err = new CmsRequestError({ status: res.status, url: url.toString(), body });
-
-    if ((import.meta as any).env?.DEV) {
-      console.warn(err.message, body ? { body } : undefined);
-    }
-
-    throw err;
+    throw new CmsRequestError({ status: res.status, url: url.toString(), body });
   }
-  return (await res.json()) as T;
+
+  try {
+    return (await res.json()) as T;
+  } catch {
+    // 200 com corpo que não é JSON (proxy, página de erro HTML, etc).
+    throw new CmsRequestError({ status: res.status, url: url.toString(), body: 'resposta não é JSON' });
+  }
 };
 
 // Strapi v4: { data: { id, attributes: {...} } }
 // Strapi v5: { data: { id, documentId, ...campos } }
-const unwrapSingle = <TAttributes>(json: StrapiResponse<any>): TAttributes | null => {
-  const data = (json as any)?.data;
+const unwrapSingle = <TAttributes>(json: StrapiResponse<unknown>): TAttributes | null => {
+  const data = (json as { data?: unknown })?.data as Record<string, unknown> | undefined;
   if (!data) return null;
-  if (data?.attributes && typeof data.attributes === 'object') return data.attributes as TAttributes;
+  if (data.attributes && typeof data.attributes === 'object') return data.attributes as TAttributes;
   return data as TAttributes;
 };
 
 // Strapi v4: { data: [ { id, attributes: {...} } ] }
 // Strapi v5: { data: [ { id, documentId, ...campos } ] }
-const unwrapCollection = <TAttributes>(json: StrapiResponse<any>): Array<StrapiEntity<TAttributes>> => {
-  const data = (json as any)?.data;
+const unwrapCollection = <TAttributes>(
+  json: StrapiResponse<unknown>
+): Array<StrapiEntity<TAttributes>> => {
+  const data = (json as { data?: unknown })?.data;
   if (!Array.isArray(data)) return [];
 
   if (data.length && data[0]?.attributes && typeof data[0].attributes === 'object') {
@@ -123,92 +153,195 @@ const unwrapCollection = <TAttributes>(json: StrapiResponse<any>): Array<StrapiE
     .map((item) => ({ id: item.id as number, attributes: item as TAttributes }));
 };
 
-export const fetchSingle = async <TAttributes>(
-  apiName: string,
-  opts?: { locale?: string; populate?: string }
-): Promise<TAttributes | null> => {
-  const cacheKey = `cms:single:${apiName}:${opts?.locale ?? ''}:${opts?.populate ?? ''}`;
+// --- Leitura -----------------------------------------------------------------
 
-  // Retorna cache válido se existir
-  const cached = cacheGet<TAttributes>(cacheKey);
-  if (cached) return cached;
+export type CmsFetchOptions<T> = {
+  locale?: string;
+  populate?: string;
+  sort?: string;
+  /** Quantos itens pedir (o Strapi corta em 25 por padrão). */
+  pageSize?: number;
+  /** Ignora o cache e vai direto na rede. */
+  force?: boolean;
+  /** Chamado quando a revalidação em segundo plano traz dados novos. */
+  onRevalidated?: (data: T) => void;
+  /** Chamado quando a requisição falha, mesmo que haja cache para exibir. */
+  onError?: (error: unknown) => void;
+};
 
-  const url = buildUrl(`/api/${apiName}`, {
-    locale: opts?.locale,
-    populate: opts?.populate,
-  });
+/**
+ * Busca com stale-while-revalidate: se houver cache fresco ele é devolvido na
+ * hora e a rede é consultada em paralelo, avisando por `onRevalidated` quando a
+ * resposta chega. Sem cache, espera a rede. Se a rede falhar e existir cache
+ * antigo, ele é usado como último recurso.
+ */
+const buscar = async <T>(
+  key: string,
+  url: URL,
+  unwrap: (json: StrapiResponse<unknown>) => T,
+  vazio: (valor: T) => boolean,
+  opts: Pick<CmsFetchOptions<T>, 'force' | 'onRevalidated' | 'onError'>,
+  fallbackUrl?: URL
+): Promise<T | null> => {
+  const daRede = async (): Promise<T> => {
+    try {
+      return unwrap(await fetchJson<StrapiResponse<unknown>>(url));
+    } catch (e) {
+      // 404 num locale que ainda não tem conteúdo: tenta o locale padrão.
+      if (fallbackUrl && e instanceof CmsRequestError && e.status === 404) {
+        return unwrap(await fetchJson<StrapiResponse<unknown>>(fallbackUrl));
+      }
+      throw e;
+    }
+  };
+
+  const cached = cacheRead<T>(key);
+  const fresco = cached && Date.now() - cached.ts <= CACHE_TTL_MS;
+
+  if (cached && fresco && !opts.force) {
+    // Revalida em segundo plano — o cache nunca "trava" conteúdo publicado.
+    void daRede()
+      .then((novo) => {
+        if (vazio(novo)) return;
+        cacheWrite(key, novo);
+        if (JSON.stringify(novo) !== JSON.stringify(cached.data)) opts.onRevalidated?.(novo);
+      })
+      .catch((e) => opts.onError?.(e));
+
+    return cached.data;
+  }
 
   try {
-    const json = await fetchJson<StrapiResponse<any>>(url);
-    const result = unwrapSingle<TAttributes>(json);
-    if (result) cacheSet(cacheKey, result);
-    return result;
+    const novo = await daRede();
+    if (!vazio(novo)) cacheWrite(key, novo);
+    return novo;
   } catch (e) {
-    if (e instanceof CmsRequestError && e.status === 404 && opts?.locale) {
-      const fallbackUrl = buildUrl(`/api/${apiName}`, { populate: opts?.populate });
-      try {
-        const json = await fetchJson<StrapiResponse<any>>(fallbackUrl);
-        const result = unwrapSingle<TAttributes>(json);
-        if (result) cacheSet(cacheKey, result);
-        return result;
-      } catch {
-        // Strapi fora do ar — usa cache antigo se existir
-        return cacheGetStale<TAttributes>(cacheKey);
-      }
-    }
-    // Strapi fora do ar — usa cache antigo se existir
-    return cacheGetStale<TAttributes>(cacheKey);
+    opts.onError?.(e);
+    // CMS fora do ar: melhor mostrar conteúdo antigo do que uma tela vazia.
+    return cached ? cached.data : null;
   }
+};
+
+export const fetchSingle = async <TAttributes>(
+  apiName: string,
+  opts: CmsFetchOptions<TAttributes | null> = {}
+): Promise<TAttributes | null> => {
+  const key = cacheKey('single', apiName, [opts.locale, opts.populate]);
+  const params = { locale: opts.locale, populate: opts.populate };
+
+  return buscar<TAttributes | null>(
+    key,
+    buildUrl(`/api/${apiName}`, params),
+    (json) => unwrapSingle<TAttributes>(json),
+    (valor) => valor === null,
+    opts,
+    opts.locale ? buildUrl(`/api/${apiName}`, { populate: opts.populate }) : undefined
+  );
 };
 
 export const fetchCollection = async <TAttributes>(
   apiName: string,
-  opts?: { locale?: string; populate?: string; sort?: string }
+  opts: CmsFetchOptions<Array<StrapiEntity<TAttributes>>> = {}
 ): Promise<Array<StrapiEntity<TAttributes>>> => {
-  const cacheKey = `cms:col:${apiName}:${opts?.locale ?? ''}:${opts?.populate ?? ''}:${opts?.sort ?? ''}`;
+  const key = cacheKey('col', apiName, [opts.locale, opts.populate, opts.sort]);
+  // Sem isto o Strapi devolve só os 25 primeiros (api.ts: defaultLimit) e o
+  // restante some do site sem nenhum aviso. 100 é o maxLimit configurado.
+  const pageSize = String(opts.pageSize ?? 100);
+  const params = {
+    locale: opts.locale,
+    populate: opts.populate,
+    sort: opts.sort,
+    'pagination[pageSize]': pageSize,
+  };
 
-  const cached = cacheGet<Array<StrapiEntity<TAttributes>>>(cacheKey);
-  if (cached) return cached;
+  const resultado = await buscar<Array<StrapiEntity<TAttributes>>>(
+    key,
+    buildUrl(`/api/${apiName}`, params),
+    (json) => unwrapCollection<TAttributes>(json),
+    (valor) => valor.length === 0,
+    opts,
+    opts.locale
+      ? buildUrl(`/api/${apiName}`, {
+          populate: opts.populate,
+          sort: opts.sort,
+          'pagination[pageSize]': pageSize,
+        })
+      : undefined
+  );
 
-  const url = buildUrl(`/api/${apiName}`, {
-    locale: opts?.locale,
-    populate: opts?.populate,
-    sort: opts?.sort,
+  return resultado ?? [];
+};
+
+// --- Escrita -----------------------------------------------------------------
+
+export type ContactPayload = {
+  name: string;
+  email: string;
+  subject?: string;
+  message: string;
+  sourceLocale?: string;
+  /** Campo-armadilha anti-spam: precisa chegar vazio. */
+  company?: string;
+};
+
+/**
+ * Envia o formulário de contato. Lança `CmsRequestError` quando o servidor
+ * recusa, para o componente conseguir mostrar um estado de erro de verdade.
+ */
+export const submitContact = async (payload: ContactPayload): Promise<void> => {
+  const url = buildUrl('/api/contact-submissions');
+
+  const res = await fetch(url.toString(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data: payload }),
   });
 
-  try {
-    const json = await fetchJson<StrapiResponse<any>>(url);
-    const result = unwrapCollection<TAttributes>(json);
-    if (result.length) cacheSet(cacheKey, result);
-    return result;
-  } catch (e) {
-    if (e instanceof CmsRequestError && e.status === 404 && opts?.locale) {
-      const fallbackUrl = buildUrl(`/api/${apiName}`, {
-        populate: opts?.populate,
-        sort: opts?.sort,
-      });
-      try {
-        const json = await fetchJson<StrapiResponse<any>>(fallbackUrl);
-        const result = unwrapCollection<TAttributes>(json);
-        if (result.length) cacheSet(cacheKey, result);
-        return result;
-      } catch {
-        return cacheGetStale<Array<StrapiEntity<TAttributes>>>(cacheKey) ?? [];
-      }
+  if (!res.ok) {
+    let body: string | undefined;
+    try {
+      body = await res.text();
+    } catch {
+      body = undefined;
     }
-    return cacheGetStale<Array<StrapiEntity<TAttributes>>>(cacheKey) ?? [];
+    throw new CmsRequestError({ status: res.status, url: url.toString(), body });
   }
 };
 
-export const getCmsImageUrl = (image: any): string | null => {
-  const maybeUrl =
-    image?.data?.attributes?.url ?? // Strapi v4
-    image?.data?.url ??
-    image?.attributes?.url ??
-    image?.url ?? // Strapi v5 (quando populated)
-    null;
-  if (typeof maybeUrl !== 'string' || !maybeUrl) return null;
+// --- Mídia -------------------------------------------------------------------
 
-  if (/^https?:\/\//i.test(maybeUrl)) return maybeUrl;
-  return new URL(maybeUrl, getCmsBaseUrl()).toString();
+type MediaObjeto = { url?: string; attributes?: { url?: string } };
+
+/**
+ * Um campo de mídia do Strapi pode chegar em vários formatos: objeto direto
+ * (v5 populado), `{ data: ... }` (v4) e, quando o campo é `multiple`, array.
+ */
+export type CmsMedia =
+  | MediaObjeto
+  | MediaObjeto[]
+  | { data?: MediaObjeto | MediaObjeto[] | null }
+  | null;
+
+export const getCmsImageUrl = (image: CmsMedia | undefined): string | null => {
+  if (!image) return null;
+
+  let alvo: MediaObjeto | undefined;
+  if (Array.isArray(image)) {
+    alvo = image[0];
+  } else if ('data' in image) {
+    const conteudo = image.data;
+    alvo = Array.isArray(conteudo) ? conteudo[0] : (conteudo ?? undefined);
+  } else {
+    alvo = image;
+  }
+
+  const bruta = alvo?.url ?? alvo?.attributes?.url;
+  if (typeof bruta !== 'string' || !bruta) return null;
+  if (/^https?:\/\//i.test(bruta)) return bruta;
+
+  try {
+    return buildUrl(bruta).toString();
+  } catch {
+    return null;
+  }
 };

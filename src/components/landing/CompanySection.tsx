@@ -2,9 +2,8 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Shield, Target, Award, Users, CheckCircle } from 'lucide-react';
 import companyImage from '@/assets/company-office.jpg';
 import { useTranslation } from 'react-i18next';
-import { useEffect, useState } from 'react';
-import { fetchSingle, getCmsImageUrl, resolveLocale } from '@/lib/cms';
-import { useRefetchOnFocus } from '@/hooks/useRefetchOnFocus';
+import { getCmsImageUrl, type CmsMedia } from '@/lib/cms';
+import { useCmsSingle } from '@/hooks/useCms';
 
 type CmsCompanyPageAttributes = {
   title1?: string;
@@ -19,58 +18,30 @@ type CmsCompanyPageAttributes = {
   deliveredValue?: string;
   levelValue?: string;
   collaboratorsValue?: string;
-  companyImage?: any[];
+  companyImage?: CmsMedia;
 };
 
-
-
 const CompanySection = () => {
-  const { t, i18n } = useTranslation();
-  const refetchTick = useRefetchOnFocus();
-  const [cmsPage, setCmsPage] = useState<CmsCompanyPageAttributes | null>(null);
+  const { t } = useTranslation();
+  const { data: cmsPage } = useCmsSingle<CmsCompanyPageAttributes>('company-page', {
+    populate: 'companyImage',
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-
-    const load = async () => {
-      try {
-        const locale = resolveLocale(i18n.language);
-        const page = await fetchSingle<CmsCompanyPageAttributes>('company-page', {
-          locale,
-          populate: 'companyImage',
-        });
-        if (cancelled) return;
-        setCmsPage(page);
-      } catch {
-        if (cancelled) return;
-        setCmsPage(null);
-      }
-    };
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [i18n.language, refetchTick]);
-  
-  let quality: string[] = [
+  const qualityItems = [
     cmsPage?.licensing || t('company.licensing'),
     cmsPage?.safety || t('company.safety'),
   ];
 
-  const qualityItems = [
-    quality[0],
-    quality[1],
-  ];
-
-  let label: string[] = [t('company.years'), t('company.delivered'), t('company.level'), t('company.collaborators')];
-
   const stats = [
-    { icon: Shield, value: cmsPage?.yearsValue || '25+', label: label[0] },
-    { icon: Target, value: cmsPage?.deliveredValue || '200+', label: label[1] },
-    { icon: Award, value: cmsPage?.levelValue || 'Nível A', label: label[2] },
-    { icon: Users, value: cmsPage?.collaboratorsValue || '800+', label: label[3] },
+    { icon: Shield, value: cmsPage?.yearsValue || '25+', label: t('company.years') },
+    { icon: Target, value: cmsPage?.deliveredValue || '200+', label: t('company.delivered') },
+    // O valor é o nível ("Nível A") e o rótulo diz o que ele significa — antes
+    // os dois exibiam o mesmo texto, e o valor vinha fixo em português.
+    { icon: Award, value: cmsPage?.levelValue || t('company.level'), label: t('company.levelLabel') },
+    { icon: Users, value: cmsPage?.collaboratorsValue || '800+', label: t('company.collaborators') },
   ];
+
+  const certificacoes = [cmsPage?.iso || t('company.iso'), cmsPage?.pbqp || t('company.pbqp')];
 
   const { ref, isVisible } = useScrollAnimation();
   return (
@@ -92,7 +63,9 @@ const CompanySection = () => {
             </p>
 
             <div className="space-y-3">
-              {qualityItems.map((item) => (
+              {/* iso e pbqp vinham do CMS e do dicionário, mas não eram
+                  renderizados em lugar nenhum — o editor preenchia à toa. */}
+              {[...certificacoes, ...qualityItems].map((item) => (
                 <div key={item} className="flex items-center gap-3">
                   <CheckCircle size={16} className="text-primary flex-shrink-0" />
                   <span className="text-silver text-sm font-light">{item}</span>
@@ -104,8 +77,8 @@ const CompanySection = () => {
           <div className={`transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <div className="relative rounded-lg overflow-hidden">
               <img
-                src={getCmsImageUrl(cmsPage?.companyImage?.[0]) || companyImage}
-                alt="EHL corporate headquarters"
+                src={getCmsImageUrl(cmsPage?.companyImage) || companyImage}
+                alt={t('a11y.companyImage')}
                 width={1280}
                 height={960}
                 loading="lazy"

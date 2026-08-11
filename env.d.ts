@@ -1,8 +1,11 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_CMS_URL: string;
-  // outras variáveis, se necessário
+  /**
+   * URL base do Strapi. Opcional de propósito: em builds sem a variável ela
+   * chega como `undefined` (ou string vazia), e o código precisa tratar isso.
+   */
+  readonly VITE_CMS_URL?: string;
 }
 
 interface ImportMeta {

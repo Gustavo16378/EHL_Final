@@ -59,28 +59,19 @@ const HeroSection = () => {
 
   useEffect(() => {
     let cancelled = false;
-
     const load = async () => {
       try {
         const locale = resolveLocale(i18n.language);
         const page = await fetchSingle<CmsHeroPageAttributes>('hero-page', { locale, populate: 'heroImage' });
         if (cancelled) return;
-
-        if ((import.meta as any).env?.DEV) {
-          console.log('[CMS] hero-page loaded', { locale, page });
-        }
-
         setCmsHero(page);
       } catch {
         if (cancelled) return;
         setCmsHero(null);
       }
     };
-
     load();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [i18n.language, refetchTick]);
 
   const videoUrl = cmsHero?.videoUrl || 'https://www.youtube.com/watch?v=quH1knOa49M';
@@ -92,19 +83,14 @@ const HeroSection = () => {
   const heroDiscover = cmsHero?.discoverLabel || t('hero.discover');
   const heroPortfolio = cmsHero?.portfolioLabel || t('hero.portfolio');
   const heroBgImage = getCmsImageUrl(cmsHero?.heroImage) ?? heroImage;
+
   useEffect(() => {
     if (!navigator.geolocation) {
       setWeather({ status: 'no-location' });
       return;
     }
-
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setCoords({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-        });
-      },
+      (pos) => setCoords({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
       () => setWeather({ status: 'no-location' }),
       { enableHighAccuracy: false, timeout: 10_000, maximumAge: 30 * 60 * 1000 }
     );
@@ -117,15 +103,12 @@ const HeroSection = () => {
     const fetchUsdBrl = async () => {
       setExchange((prev) => (prev.status === 'ready' ? prev : { status: 'loading' }));
       try {
-        const res = await fetch('https://open.er-api.com/v6/latest/USD', {
-          signal: abortController.signal,
-        });
+        const res = await fetch('https://open.er-api.com/v6/latest/USD', { signal: abortController.signal });
         if (!res.ok) throw new Error('exchange');
         const data = await res.json();
         const brl = Number(data?.rates?.BRL);
         const updatedUnix = Number(data?.time_last_update_unix);
         if (!Number.isFinite(brl) || !Number.isFinite(updatedUnix)) throw new Error('exchange-shape');
-
         if (!isMounted) return;
         setExchange({ status: 'ready', brlPerUsd: brl, updatedAt: new Date(updatedUnix * 1000) });
       } catch {
@@ -136,12 +119,7 @@ const HeroSection = () => {
 
     fetchUsdBrl();
     const id = window.setInterval(fetchUsdBrl, 10 * 60 * 1000);
-
-    return () => {
-      isMounted = false;
-      abortController.abort();
-      window.clearInterval(id);
-    };
+    return () => { isMounted = false; abortController.abort(); window.clearInterval(id); };
   }, []);
 
   useEffect(() => {
@@ -171,7 +149,6 @@ const HeroSection = () => {
         const precipitationSum = Number(data?.daily?.precipitation_sum?.[0]);
 
         if (![now, max, min, rainProbMax, precipitationSum].every(Number.isFinite)) throw new Error('weather-shape');
-
         if (!isMounted) return;
         setWeather({
           status: 'ready',
@@ -190,129 +167,79 @@ const HeroSection = () => {
 
     fetchWeather();
     const id = window.setInterval(fetchWeather, 10 * 60 * 1000);
-
-    return () => {
-      isMounted = false;
-      abortController.abort();
-      window.clearInterval(id);
-    };
+    return () => { isMounted = false; abortController.abort(); window.clearInterval(id); };
   }, [coords]);
 
   return (
     <>
-      <section id="home" className="relative min-h-screen flex items-center overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src={heroBgImage}
-            alt="Infrastructure engineering project"
-            width={1920}
-            height={1080}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60" />
-        </div>
+      {/* ── HERO ── */}
+      <section id="home" className="relative min-h-screen flex items-center bg-background overflow-hidden">
+        <div className="container mx-auto px-6 relative z-10 py-32">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
-        <div className="container mx-auto px-6 relative z-10 py-24">
-          <div className="max-w-3xl">
-            <div className="animate-fade-up opacity-0" style={{ animationFillMode: 'forwards' }}>
-              <div className="w-16 h-[2px] gradient-red-line mb-8" />
-              <h1 className="text-5xl sm:text-6xl lg:text-8xl font-extralight tracking-tight text-foreground leading-[1.05]">
-                {heroTitle1}
-                <br />
-                <span className="font-light">{heroTitle2}</span>
-                <span className="text-primary font-normal">.</span>
-              </h1>
-            </div>
-
-            <p className="animate-fade-up opacity-0 animation-delay-400 text-silver text-lg sm:text-xl font-light mt-8 max-w-xl leading-relaxed" style={{ animationFillMode: 'forwards' }}>
-              {heroSubtitle}
-            </p>
-
-            <div className="animate-fade-up opacity-0 animation-delay-600 flex gap-4 mt-12" style={{ animationFillMode: 'forwards' }}>
-              <Link
-                to="/company"
-                className="bg-primary text-primary-foreground px-8 py-3.5 rounded text-sm font-medium hover:opacity-90 transition-opacity"
+            {/* Texto — esquerda */}
+            <div>
+              <div
+                className="animate-fade-up opacity-0"
+                style={{ animationFillMode: 'forwards' }}
               >
-                {heroDiscover}
-              </Link>
-              <Link
-                to="/portfolio"
-                className="border border-border text-foreground px-8 py-3.5 rounded text-sm font-medium hover:bg-secondary transition-colors"
-              >
-                {heroPortfolio}
-              </Link>
-            </div>
-
-            <div className="animate-fade-up opacity-0 animation-delay-800 grid grid-cols-1 sm:grid-cols-2 gap-4 mt-12" style={{ animationFillMode: 'forwards' }}>
-              <div className="bg-card/60 border border-border/50 rounded-lg p-4 backdrop-blur-sm">
-                <div className="flex items-center gap-2 text-muted-foreground mb-3">
-                  <DollarSign size={16} className="text-primary" />
-                  <span className="text-xs font-medium tracking-wide uppercase">{t('hero.widgets.usd')}</span>
-                </div>
-                {exchange.status === 'ready' ? (
-                  <>
-                    <p className="text-2xl font-light text-foreground leading-none">
-                      1 USD = {exchange.brlPerUsd.toFixed(4)} BRL
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {t('hero.widgets.updatedAt')}: {exchange.updatedAt.toLocaleString()}
-                    </p>
-                  </>
-                ) : exchange.status === 'error' ? (
-                  <p className="text-sm text-silver font-light">{t('hero.widgets.usdError')}</p>
-                ) : (
-                  <p className="text-sm text-silver font-light">{t('hero.widgets.loading')}</p>
-                )}
+                <div className="w-10 h-[2px] gradient-red-line mb-10" />
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extralight tracking-tight text-foreground leading-[1.05]">
+                  {heroTitle1}
+                  <br />
+                  <span className="font-light">{heroTitle2}</span>
+                  <span className="text-primary font-normal">.</span>
+                </h1>
               </div>
 
-              <div className="bg-card/60 border border-border/50 rounded-lg p-4 backdrop-blur-sm">
-                <div className="flex items-center gap-2 text-muted-foreground mb-3">
-                  <CloudSun size={16} className="text-primary" />
-                  <span className="text-xs font-medium tracking-wide uppercase">{t('hero.widgets.weather')}</span>
-                </div>
-                {weather.status === 'ready' ? (
-                  <>
-                    <p className="text-2xl font-light text-foreground leading-none">
-                      {weather.temperatureNow.toFixed(0)}°C
-                    </p>
-                    <p className="text-sm text-silver font-light mt-2">
-                      {t('hero.widgets.todayRange')}: {weather.temperatureMin.toFixed(0)}°C – {weather.temperatureMax.toFixed(0)}°C
-                    </p>
-                    <p className="text-sm text-silver font-light mt-2">
-                      {t('hero.widgets.rain')}: {weather.willRain ? t('hero.widgets.rainYes') : t('hero.widgets.rainNo')} ({weather.rainProbabilityMax.toFixed(0)}%)
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {t('hero.widgets.updatedAt')}: {weather.updatedAt.toLocaleString()}
-                    </p>
-                  </>
-                ) : weather.status === 'no-location' ? (
-                  <p className="text-sm text-silver font-light">{t('hero.widgets.weatherNoLocation')}</p>
-                ) : weather.status === 'error' ? (
-                  <p className="text-sm text-silver font-light">{t('hero.widgets.weatherError')}</p>
-                ) : (
-                  <p className="text-sm text-silver font-light">{t('hero.widgets.loading')}</p>
-                )}
+              <p
+                className="animate-fade-up opacity-0 animation-delay-400 text-silver text-lg font-light mt-8 max-w-md leading-relaxed"
+                style={{ animationFillMode: 'forwards' }}
+              >
+                {heroSubtitle}
+              </p>
+
+              <div
+                className="animate-fade-up opacity-0 animation-delay-600 flex flex-wrap gap-4 mt-12"
+                style={{ animationFillMode: 'forwards' }}
+              >
+                <Link
+                  to="/company"
+                  className="bg-primary text-primary-foreground px-8 py-3.5 rounded text-sm font-medium hover:opacity-90 transition-opacity"
+                >
+                  {heroDiscover}
+                </Link>
+                <Link
+                  to="/portfolio"
+                  className="border border-border text-foreground px-8 py-3.5 rounded text-sm font-medium hover:bg-secondary transition-colors"
+                >
+                  {heroPortfolio}
+                </Link>
               </div>
             </div>
+
+            {/* Imagem — direita */}
+            <div
+              className="animate-fade-up opacity-0 animation-delay-400 hidden lg:flex items-center justify-center"
+              style={{ animationFillMode: 'forwards' }}
+            >
+              <div className="relative w-full max-w-lg">
+                <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/20 to-transparent blur-xl" />
+                <img
+                  src={heroBgImage}
+                  alt="Infrastructure engineering project"
+                  className="relative w-full h-[520px] object-cover rounded-2xl border border-border/40"
+                />
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
 
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src={heroBgImage}
-            alt="Infrastructure engineering project"
-            width={1920}
-            height={1080}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60" />
-        </div>
-
-        <div className="container mx-auto px-6 relative z-10">
+      {/* ── VÍDEO ── */}
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-6">
           <div className="w-full lg:max-w-5xl lg:mx-auto">
             <div className="bg-card/60 border border-border/50 rounded-lg p-4 backdrop-blur-sm">
               <div className="flex items-center justify-between gap-3 text-muted-foreground mb-3">
@@ -345,6 +272,63 @@ const HeroSection = () => {
                 </div>
               ) : (
                 <p className="text-sm text-silver font-light">{t('hero.widgets.videoUnavailable')}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── WIDGETS (dólar + clima) ── */}
+      <section className="pb-20 bg-background">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:max-w-5xl lg:mx-auto">
+            <div className="bg-card/60 border border-border/50 rounded-lg p-4 backdrop-blur-sm">
+              <div className="flex items-center gap-2 text-muted-foreground mb-3">
+                <DollarSign size={16} className="text-primary" />
+                <span className="text-xs font-medium tracking-wide uppercase">{t('hero.widgets.usd')}</span>
+              </div>
+              {exchange.status === 'ready' ? (
+                <>
+                  <p className="text-2xl font-light text-foreground leading-none">
+                    1 USD = {exchange.brlPerUsd.toFixed(4)} BRL
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {t('hero.widgets.updatedAt')}: {exchange.updatedAt.toLocaleString()}
+                  </p>
+                </>
+              ) : exchange.status === 'error' ? (
+                <p className="text-sm text-silver font-light">{t('hero.widgets.usdError')}</p>
+              ) : (
+                <p className="text-sm text-silver font-light">{t('hero.widgets.loading')}</p>
+              )}
+            </div>
+
+            <div className="bg-card/60 border border-border/50 rounded-lg p-4 backdrop-blur-sm">
+              <div className="flex items-center gap-2 text-muted-foreground mb-3">
+                <CloudSun size={16} className="text-primary" />
+                <span className="text-xs font-medium tracking-wide uppercase">{t('hero.widgets.weather')}</span>
+              </div>
+              {weather.status === 'ready' ? (
+                <>
+                  <p className="text-2xl font-light text-foreground leading-none">
+                    {weather.temperatureNow.toFixed(0)}°C
+                  </p>
+                  <p className="text-sm text-silver font-light mt-2">
+                    {t('hero.widgets.todayRange')}: {weather.temperatureMin.toFixed(0)}°C – {weather.temperatureMax.toFixed(0)}°C
+                  </p>
+                  <p className="text-sm text-silver font-light mt-2">
+                    {t('hero.widgets.rain')}: {weather.willRain ? t('hero.widgets.rainYes') : t('hero.widgets.rainNo')} ({weather.rainProbabilityMax.toFixed(0)}%)
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {t('hero.widgets.updatedAt')}: {weather.updatedAt.toLocaleString()}
+                  </p>
+                </>
+              ) : weather.status === 'no-location' ? (
+                <p className="text-sm text-silver font-light">{t('hero.widgets.weatherNoLocation')}</p>
+              ) : weather.status === 'error' ? (
+                <p className="text-sm text-silver font-light">{t('hero.widgets.weatherError')}</p>
+              ) : (
+                <p className="text-sm text-silver font-light">{t('hero.widgets.loading')}</p>
               )}
             </div>
           </div>

@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import equipmentBg from '@/assets/equipment-machinery.jpg';
 import { useTranslation } from 'react-i18next';
-import { fetchCollection, fetchSingle, getCmsImageUrl, resolveLocale } from '@/lib/cms';
-import { useRefetchOnFocus } from '@/hooks/useRefetchOnFocus';
+import { getCmsImageUrl, type CmsMedia } from '@/lib/cms';
+import { useCmsCollection, useCmsSingle } from '@/hooks/useCms';
 
 interface Equipamento {
   id: number;
@@ -20,7 +20,7 @@ type CmsEquipmentAttributes = {
   description?: string;
   amount?: string;
   category?: string;
-  image?: unknown;
+  image?: CmsMedia;
 };
 
 type CmsEquipmentsPageAttributes = {
@@ -32,67 +32,50 @@ type CmsEquipmentsPageAttributes = {
 const EquipamentsSection = () => {
   const { ref, isVisible } = useScrollAnimation();
   const [selected, setSelected] = useState<Equipamento | null>(null);
-  const { t, i18n } = useTranslation();
-  const refetchTick = useRefetchOnFocus();
-  const [cmsPage, setCmsPage] = useState<CmsEquipmentsPageAttributes | null>(null);
-  const [equipamentos, setEquipamentos] = useState<Equipamento[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
-  useEffect(() => {
-    let cancelled = false;
+  const { data: cmsPage } = useCmsSingle<CmsEquipmentsPageAttributes>('equipments-page');
+  const {
+    data: items,
+    loading,
+    failed,
+  } = useCmsCollection<CmsEquipmentAttributes>('equipments', {
+    populate: 'image',
+    sort: 'id:asc',
+  });
 
-    const load = async () => {
-      setLoading(true);
-      try {
-        const locale = resolveLocale(i18n.language);
-        const [page, items] = await Promise.all([
-          fetchSingle<CmsEquipmentsPageAttributes>('equipments-page', { locale }),
-          fetchCollection<CmsEquipmentAttributes>('equipments', {
-            locale,
-            populate: 'image',
-            sort: 'id:asc',
-          }),
-        ]);
-
-        if (cancelled) return;
-        setCmsPage(page);
-
-        const mapped = items
-          .map((entity) => {
-            const attrs = entity.attributes ?? {};
-            return {
-              id: entity.id,
-              nome: (attrs as any).name ?? '',
-              descricao: (attrs as any).description ?? '',
-              quantidade: (attrs as any).amount ?? '',
-              categoria: (attrs as any).category ?? '',
-              imagem: getCmsImageUrl((attrs as any).image),
-            } satisfies Equipamento;
-          })
-          .filter((equip) => Boolean(equip.nome));
-
-        setEquipamentos(mapped);
-      } catch {
-        if (cancelled) return;
-        setCmsPage(null);
-        setEquipamentos([]);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-
-    load();
-    return () => { cancelled = true; };
-  }, [i18n.language, refetchTick]);
+  const equipamentos: Equipamento[] = items
+    .map((entity) => {
+      const attrs = entity.attributes ?? {};
+      return {
+        id: entity.id,
+        nome: attrs.name ?? '',
+        descricao: attrs.description ?? '',
+        quantidade: attrs.amount ?? '',
+        categoria: attrs.category ?? '',
+        imagem: getCmsImageUrl(attrs.image),
+      } satisfies Equipamento;
+    })
+    .filter((equip) => Boolean(equip.nome));
 
   const headerTitle1 = cmsPage?.title1 || t('equipments.title1');
   const headerTitle2 = cmsPage?.title2 || t('equipments.title2');
   const headerSubtitle = cmsPage?.subtitle || t('equipments.subtitle');
 
   return (
-    <main className="min-h-screen py-32 relative">
+    /* <section> e não <main>: o <main> da página já é o do Layout, e dois
+       landmarks main no mesmo documento é HTML inválido. */
+    <section className="min-h-screen py-32 relative">
       <div className="absolute inset-0 opacity-5">
-        <img src={equipmentBg} alt="" className="w-full h-full object-cover" loading="lazy" width={1280} height={960} />
+        <img
+          src={equipmentBg}
+          alt=""
+          aria-hidden="true"
+          className="w-full h-full object-cover"
+          loading="lazy"
+          width={1280}
+          height={960}
+        />
       </div>
       <div className="absolute inset-0 bg-background/95" />
 
@@ -107,19 +90,26 @@ const EquipamentsSection = () => {
 
         {loading ? (
           <div className="text-center py-16 text-muted-foreground text-sm font-light">
-            Carregando...
+            {t('common.loading')}
+          </div>
+        ) : failed ? (
+          <div className="text-center py-16 text-muted-foreground text-sm font-light">
+            {t('common.loadError')}
           </div>
         ) : equipamentos.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground text-sm font-light">
-            Nenhum equipamento cadastrado no momento.
+            {t('equipments.empty')}
           </div>
         ) : (
           <div className={`grid md:grid-cols-2 xl:grid-cols-3 gap-8 transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             {equipamentos.map((equip) => (
-              <div
+              /* <button> em vez de <div onClick>: o card abre um modal e
+                 precisa ser alcançável por Tab e acionável por Enter/Espaço. */
+              <button
+                type="button"
                 key={equip.id}
                 onClick={() => setSelected(equip)}
-                className="cursor-pointer group rounded-lg border border-border bg-card/80 hover:border-primary/40 transition-all duration-500 hover:-translate-y-1 overflow-hidden"
+                className="text-left w-full cursor-pointer group rounded-lg border border-border bg-card/80 hover:border-primary/40 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-all duration-500 hover:-translate-y-1 overflow-hidden"
               >
                 <div className="relative h-52 overflow-hidden bg-card/50">
                   {equip.imagem ? (
@@ -152,7 +142,7 @@ const EquipamentsSection = () => {
                   </div>
                   <div className="w-0 h-[2px] bg-primary mt-5 transition-all duration-500 group-hover:w-12" />
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         )}
@@ -176,7 +166,11 @@ const EquipamentsSection = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
                   <div className="absolute bottom-4 left-6 right-6">
                     <span className="text-xs font-medium tracking-wider uppercase text-primary mb-2 block">{selected.categoria}</span>
-                    <h2 className="text-2xl font-light text-foreground leading-snug">{selected.nome}</h2>
+                    {/* DialogTitle dá nome acessível ao modal; sem ele o Radix
+                        avisa no console e leitores de tela anunciam "dialog". */}
+                    <DialogTitle asChild>
+                      <h2 className="text-2xl font-light text-foreground leading-snug">{selected.nome}</h2>
+                    </DialogTitle>
                   </div>
                 </div>
                 <div className="p-6 space-y-5">
@@ -186,14 +180,16 @@ const EquipamentsSection = () => {
                       {selected.quantidade}
                     </span>
                   </div>
-                  <p className="text-silver font-light leading-relaxed text-base">{selected.descricao}</p>
+                  <DialogDescription asChild>
+                    <p className="text-silver font-light leading-relaxed text-base">{selected.descricao}</p>
+                  </DialogDescription>
                 </div>
               </>
             )}
           </DialogContent>
         </Dialog>
       </div>
-    </main>
+    </section>
   );
 };
 

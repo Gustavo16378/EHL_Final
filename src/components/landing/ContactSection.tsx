@@ -1,9 +1,9 @@
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { MapPin, Phone, Mail, Send, Newspaper } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { MapPin, Phone, Mail, Send, Newspaper, Loader2 } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { fetchSingle, resolveLocale } from '@/lib/cms';
-import { useRefetchOnFocus } from '@/hooks/useRefetchOnFocus';
+import { resolveLocale, submitContact } from '@/lib/cms';
+import { useCmsSingle } from '@/hooks/useCms';
 
 type CmsContactPageAttributes = {
   title1?: string;
@@ -27,39 +27,46 @@ type CmsContactPageAttributes = {
   sentButton?: string;
 };
 
+const CAMPOS_INICIAIS = { name: '', email: '', subject: '', message: '', company: '' };
+
+const campoClasses =
+  'w-full bg-card border border-border rounded px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none transition-colors';
+
 const ContactSection = () => {
   const { ref, isVisible } = useScrollAnimation();
-  const [submitted, setSubmitted] = useState(false);
   const { t, i18n } = useTranslation();
-  const refetchTick = useRefetchOnFocus();
-  const [cmsPage, setCmsPage] = useState<CmsContactPageAttributes | null>(null);
+  const { data: cmsPage } = useCmsSingle<CmsContactPageAttributes>('contact-page');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [campos, setCampos] = useState(CAMPOS_INICIAIS);
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+
+  const atualizar =
+    (campo: keyof typeof CAMPOS_INICIAIS) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setCampos((atual) => ({ ...atual, [campo]: e.target.value }));
+      if (status === 'error') setStatus('idle');
+    };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
+    if (status === 'sending') return;
+
+    setStatus('sending');
+    try {
+      await submitContact({
+        name: campos.name.trim(),
+        email: campos.email.trim(),
+        subject: campos.subject.trim() || undefined,
+        message: campos.message.trim(),
+        sourceLocale: resolveLocale(i18n.language),
+        company: campos.company,
+      });
+      setCampos(CAMPOS_INICIAIS);
+      setStatus('sent');
+    } catch {
+      setStatus('error');
+    }
   };
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const load = async () => {
-      try {
-        const locale = resolveLocale(i18n.language);
-        const page = await fetchSingle<CmsContactPageAttributes>('contact-page', { locale });
-        if (cancelled) return;
-        setCmsPage(page);
-      } catch {
-        if (cancelled) return;
-        setCmsPage(null);
-      }
-    };
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [i18n.language, refetchTick]);
 
   const headerTitle1 = cmsPage?.title1 || t('contact.title1');
   const headerTitle2 = cmsPage?.title2 || t('contact.title2');
@@ -114,39 +121,110 @@ const ContactSection = () => {
               ))}
             </div>
 
-            <form onSubmit={handleSubmit} className="lg:col-span-3 space-y-5">
+            <form onSubmit={handleSubmit} className="lg:col-span-3 space-y-5" noValidate={false}>
               <div className="grid sm:grid-cols-2 gap-5">
+                <div>
+                  <label htmlFor="contact-name" className="sr-only">
+                    {namePlaceholder}
+                  </label>
+                  <input
+                    id="contact-name"
+                    name="name"
+                    type="text"
+                    autoComplete="name"
+                    maxLength={120}
+                    value={campos.name}
+                    onChange={atualizar('name')}
+                    placeholder={namePlaceholder}
+                    required
+                    className={campoClasses}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="contact-email" className="sr-only">
+                    {emailPlaceholder}
+                  </label>
+                  <input
+                    id="contact-email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    maxLength={180}
+                    value={campos.email}
+                    onChange={atualizar('email')}
+                    placeholder={emailPlaceholder}
+                    required
+                    className={campoClasses}
+                  />
+                </div>
+              </div>
+
+              <label htmlFor="contact-subject" className="sr-only">
+                {subjectPlaceholder}
+              </label>
+              <input
+                id="contact-subject"
+                name="subject"
+                type="text"
+                maxLength={180}
+                value={campos.subject}
+                onChange={atualizar('subject')}
+                placeholder={subjectPlaceholder}
+                className={campoClasses}
+              />
+
+              <label htmlFor="contact-message" className="sr-only">
+                {messagePlaceholder}
+              </label>
+              <textarea
+                id="contact-message"
+                name="message"
+                rows={5}
+                maxLength={5000}
+                value={campos.message}
+                onChange={atualizar('message')}
+                placeholder={messagePlaceholder}
+                required
+                className={`${campoClasses} resize-none`}
+              />
+
+              {/* Armadilha anti-spam: invisível para pessoas, preenchida por bots. */}
+              <div className="hidden" aria-hidden="true">
+                <label htmlFor="contact-company">Empresa</label>
                 <input
+                  id="contact-company"
+                  name="company"
                   type="text"
-                  placeholder={namePlaceholder}
-                  required
-                  className="w-full bg-card border border-border rounded px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none transition-colors"
-                />
-                <input
-                  type="email"
-                  placeholder={emailPlaceholder}
-                  required
-                  className="w-full bg-card border border-border rounded px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none transition-colors"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={campos.company}
+                  onChange={atualizar('company')}
                 />
               </div>
-              <input
-                type="text"
-                placeholder={subjectPlaceholder}
-                className="w-full bg-card border border-border rounded px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none transition-colors"
-              />
-              <textarea
-                placeholder={messagePlaceholder}
-                rows={5}
-                required
-                className="w-full bg-card border border-border rounded px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none transition-colors resize-none"
-              />
-              <button
-                type="submit"
-                className="bg-primary text-primary-foreground px-8 py-3.5 rounded text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
-              >
-                {submitted ? sentButton : sendButton}
-                <Send size={16} />
-              </button>
+
+              <div className="flex flex-wrap items-center gap-4">
+                <button
+                  type="submit"
+                  disabled={status === 'sending'}
+                  className="bg-primary text-primary-foreground px-8 py-3.5 rounded text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {status === 'sending' ? t('contact.sending') : status === 'sent' ? sentButton : sendButton}
+                  {status === 'sending' ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Send size={16} />
+                  )}
+                </button>
+
+                <p aria-live="polite" role="status" className="text-sm">
+                  {status === 'sent' && (
+                    <span className="text-primary">{t('contact.successMessage')}</span>
+                  )}
+                  {status === 'error' && (
+                    <span className="text-destructive">{t('contact.errorMessage')}</span>
+                  )}
+                </p>
+              </div>
             </form>
           </div>
         </div>

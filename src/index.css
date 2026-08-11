@@ -25,6 +25,13 @@
     --input: 220 10% 17%;
     --ring: 46 98% 53%;                 /* Anel de foco em amarelo carteira */
     --radius: 0.5rem;
+
+    /* Referenciadas em tailwind.config.js e até então indefinidas: utilitários
+       como text-destructive/bg-popover geravam hsl() inválido e não pintavam. */
+    --destructive: 355 80% 48%;         /* Vermelho EHL */
+    --destructive-foreground: 0 0% 100%;
+    --popover: 220 10% 17%;             /* Mesma do card */
+    --popover-foreground: 0 0% 97%;
   }
 }
 
@@ -41,7 +48,13 @@
   .animation-delay-800 {
     animation-delay: 800ms;
   }
+  /* Filete de destaque abaixo dos títulos. As duas variantes existem porque os
+     componentes usam os dois nomes; `gradient-yellow-line` estava sendo aplicada
+     sem nunca ter sido definida, deixando o divisor de Equipamentos invisível. */
   .gradient-red-line {
+    @apply bg-gradient-to-r from-primary to-transparent;
+  }
+  .gradient-yellow-line {
     @apply bg-gradient-to-r from-primary to-transparent;
   }
 }

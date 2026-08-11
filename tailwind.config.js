@@ -3,13 +3,7 @@ import tailwindcssAnimate from "tailwindcss-animate";
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: ["class"],
-  content: [
-    './index.html',
-    './pages/**/*.{js,ts,jsx,tsx}',
-    './components/**/*.{js,ts,jsx,tsx}',
-    './app/**/*.{js,ts,jsx,tsx}',
-    './src/**/*.{js,ts,jsx,tsx}',
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   prefix: "",
   theme: {
     container: {
@@ -77,12 +71,19 @@ export default {
         "fade-up": {
           from: { opacity: 0, transform: "translateY(20px)" },
           to: { opacity: 1, transform: "translateY(0)" },
-        }
+        },
+        // Usada por CompanySection; sem esta definição a classe
+        // `animate-slide-left` não gerava nenhum CSS.
+        "slide-left": {
+          from: { opacity: 0, transform: "translateX(-24px)" },
+          to: { opacity: 1, transform: "translateX(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-up": "fade-up 0.5s ease-out",
+        "slide-left": "slide-left 0.6s ease-out",
       },
     },
   },

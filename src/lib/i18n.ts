@@ -53,6 +53,7 @@ const resources = {
         years: "Anos de Experiência",
         delivered: "Obras Entregues",
         level: "Nível A",
+        levelLabel: "Certificação",
         collaborators: "Colaboradores"
       },
 
@@ -60,6 +61,7 @@ const resources = {
         title1: "Nossos",
         title2: " Equipamentos",
         subtitle: "Frota própria de máquinas pesadas e equipamentos de última geração para atender obras de qualquer porte e complexidade.",
+        empty: "Nenhum equipamento cadastrado no momento.",
         1: {
           title: "Escavadeiras Hidráulicas",
           description: "Máquinas de alta performance para escavação de valas, fundações e movimentação de terra em grandes volumes. Frota com modelos de 20 a 50 toneladas.",
@@ -101,6 +103,7 @@ const resources = {
         title1: "Obras",
         title2: " em Andamento",
         subtitle: "Acompanhe os projetos que a EHL está executando neste momento — engenharia pesada com excelência em todo o Brasil.",
+        empty: "Nenhuma obra cadastrada no momento.",
         labels: {
           location: "Localização",
           client: "Cliente",
@@ -171,6 +174,7 @@ const resources = {
         title1: "Projetos em",
         title2: "Destaque",
         subtitle: "Obras de engenharia de excelência por todo o Brasil.",
+        empty: "Nenhum projeto cadastrado no momento.",
         detailsTitle: "Detalhes de Execução",
         1: {
           title: "Vila Olímpica dos Jogos Indígenas",
@@ -234,7 +238,29 @@ const resources = {
         subjectPlaceholder: "Assunto",
         messagePlaceholder: "Conte-nos sobre o seu projeto...",
         sendButton: "Enviar Mensagem",
-        sentButton: "Mensagem enviada!"
+        sentButton: "Mensagem enviada!",
+        sending: "Enviando…",
+        successMessage: "Recebemos sua mensagem. Retornaremos em breve.",
+        errorMessage: "Não foi possível enviar agora. Tente novamente em instantes."
+      },
+      common: {
+        loading: "Carregando…",
+        loadError: "Não foi possível carregar o conteúdo.",
+        retry: "Tentar novamente",
+        close: "Fechar"
+      },
+      notFound: {
+        title: "Página não encontrada",
+        description: "O endereço que você acessou não existe ou foi movido.",
+        back: "Voltar para o início"
+      },
+      a11y: {
+        openMenu: "Abrir menu",
+        closeMenu: "Fechar menu",
+        selectLanguage: "Selecionar idioma",
+        heroImage: "Obra de infraestrutura executada pela EHL",
+        companyImage: "Equipe e escritório da EHL",
+        equipmentsImage: "Frota de máquinas pesadas da EHL"
       },
       footer: {
         desc: "Excelência em engenharia desde 1998. Entregando soluções de classe mundial em infraestrutura, pavimentação e obras públicas por todo o Brasil.",
@@ -308,6 +334,7 @@ const resources = {
         years: "Years of Experience",
         delivered: "Projects Delivered",
         level: "Level A",
+        levelLabel: "Certification",
         collaborators: "Collaborators"
       },
 
@@ -315,6 +342,7 @@ const resources = {
         title1: "Our",
         title2: " Equipment",
         subtitle: "In-house fleet of heavy machinery and state-of-the-art equipment to serve projects of any size and complexity.",
+        empty: "No equipment registered yet.",
         1: {
           title: "Hydraulic Excavators",
           description: "High-performance machines for digging trenches, foundations, and moving large volumes of earth. Fleet with models from 20 to 50 tons.",
@@ -357,6 +385,7 @@ const resources = {
         title1: "Projects",
         title2: " in Progress",
         subtitle: "Follow the projects EHL is currently executing — heavy engineering with excellence across Brazil.",
+        empty: "No construction projects registered yet.",
         labels: {
           location: "Location",
           client: "Client",
@@ -428,6 +457,7 @@ const resources = {
         title1: "Featured",
         title2: "Projects",
         subtitle: "Engineering excellence projects throughout Brazil.",
+        empty: "No projects registered yet.",
         detailsTitle: "Execution Details",
         1: {
           title: "Indigenous Games Olympic Village",
@@ -491,7 +521,29 @@ const resources = {
         subjectPlaceholder: "Subject",
         messagePlaceholder: "Tell us about your project...",
         sendButton: "Send Message",
-        sentButton: "Message Sent!"
+        sentButton: "Message Sent!",
+        sending: "Sending…",
+        successMessage: "We got your message. We'll get back to you shortly.",
+        errorMessage: "We couldn't send it right now. Please try again in a moment."
+      },
+      common: {
+        loading: "Loading…",
+        loadError: "We couldn't load this content.",
+        retry: "Try again",
+        close: "Close"
+      },
+      notFound: {
+        title: "Page not found",
+        description: "The address you opened doesn't exist or has been moved.",
+        back: "Back to home"
+      },
+      a11y: {
+        openMenu: "Open menu",
+        closeMenu: "Close menu",
+        selectLanguage: "Select language",
+        heroImage: "Infrastructure project delivered by EHL",
+        companyImage: "EHL team and offices",
+        equipmentsImage: "EHL heavy machinery fleet"
       },
       footer: {
         desc: "Engineering excellence since 1998. Delivering world-class solutions in infrastructure, paving, and public works across Brazil.",
@@ -565,12 +617,14 @@ const resources = {
         years: "Años de Experiencia",
         delivered: "Obras Entregadas",
         level: "Nivel A",
+        levelLabel: "Certificación",
         collaborators: "Colaboradores"
       },
       equipments: {
         title1: "Nuestros ",
         title2: " Equipos",
         subtitle: "Flota propia de maquinaria pesada y equipos de última generación para atender obras de cualquier tamaño y complejidad.",
+        empty: "No hay equipos registrados por ahora.",
         1: {
           title: "Excavadoras Hidráulicas",
           description: "Máquinas de alto rendimiento para excavación de zanjas, cimientos y movimiento de grandes volúmenes de tierra. Flota con modelos de 20 a 50 toneladas.",
@@ -612,6 +666,7 @@ const resources = {
         title1: "Obras",
         title2: " en Ejecución",
         subtitle: "Sigue los proyectos que EHL está ejecutando ahora — ingeniería pesada con excelencia en todo Brasil.",
+        empty: "No hay obras registradas por ahora.",
         labels: {
           location: "Ubicación",
           client: "Cliente",
@@ -683,6 +738,7 @@ const resources = {
         title1: "Proyectos",
         title2: "Destacados",
         subtitle: "Obras de excelencia en ingeniería por todo Brasil.",
+        empty: "No hay proyectos registrados por ahora.",
         detailsTitle: "Detalles de Ejecución",
         1: {
           title: "Villa Olímpica de los Juegos Indígenas",
@@ -746,7 +802,29 @@ const resources = {
         subjectPlaceholder: "Asunto",
         messagePlaceholder: "Cuéntanos sobre tu proyecto...",
         sendButton: "Enviar Mensaje",
-        sentButton: "¡Mensaje enviado!"
+        sentButton: "¡Mensaje enviado!",
+        sending: "Enviando…",
+        successMessage: "Recibimos tu mensaje. Te responderemos en breve.",
+        errorMessage: "No pudimos enviarlo ahora. Inténtalo de nuevo en unos instantes."
+      },
+      common: {
+        loading: "Cargando…",
+        loadError: "No se pudo cargar el contenido.",
+        retry: "Intentar de nuevo",
+        close: "Cerrar"
+      },
+      notFound: {
+        title: "Página no encontrada",
+        description: "La dirección que abriste no existe o fue movida.",
+        back: "Volver al inicio"
+      },
+      a11y: {
+        openMenu: "Abrir menú",
+        closeMenu: "Cerrar menú",
+        selectLanguage: "Seleccionar idioma",
+        heroImage: "Obra de infraestructura ejecutada por EHL",
+        companyImage: "Equipo y oficinas de EHL",
+        equipmentsImage: "Flota de maquinaria pesada de EHL"
       },
       footer: {
         desc: "Excelencia en ingeniería desde 1998. Entregando soluciones de clase mundial en infraestructura, pavimentación y obras públicas en todo Brasil.",
@@ -770,15 +848,60 @@ const resources = {
   }
 };
 
+export const IDIOMAS_SUPORTADOS = ['pt', 'en', 'es'] as const;
+export type IdiomaSuportado = (typeof IDIOMAS_SUPORTADOS)[number];
+
+const STORAGE_KEY = 'ehl:lang';
+const suportado = (valor: string | null | undefined): valor is IdiomaSuportado =>
+  Boolean(valor) && (IDIOMAS_SUPORTADOS as readonly string[]).includes(valor as string);
+
+/**
+ * Ordem de detecção: escolha salva pelo visitante → idioma do navegador → pt.
+ * Sem isto o `lng` ficava fixo em 'pt' e qualquer reload desfazia a troca de
+ * idioma feita no header.
+ */
+const detectarIdioma = (): IdiomaSuportado => {
+  try {
+    const salvo = localStorage.getItem(STORAGE_KEY);
+    if (suportado(salvo)) return salvo;
+  } catch {
+    // localStorage bloqueado (modo privado, cookies desativados) — segue adiante.
+  }
+
+  const doNavegador =
+    typeof navigator !== 'undefined' ? (navigator.languages?.[0] ?? navigator.language) : '';
+  const base = (doNavegador || 'pt').toLowerCase().split('-')[0];
+  return suportado(base) ? base : 'pt';
+};
+
+const aplicarIdiomaNoDocumento = (lng: string) => {
+  if (typeof document === 'undefined') return;
+  // O <html lang> precisa acompanhar o idioma para leitores de tela e para o
+  // buscador entenderem o conteúdo.
+  document.documentElement.lang = lng === 'pt' ? 'pt-BR' : lng;
+};
+
 i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'pt', // idioma padrão
+    lng: detectarIdioma(),
     fallbackLng: 'pt',
+    supportedLngs: [...IDIOMAS_SUPORTADOS],
     interpolation: {
       escapeValue: false
     }
   });
+
+aplicarIdiomaNoDocumento(i18n.language);
+
+i18n.on('languageChanged', (lng) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, lng);
+  } catch {
+    // Sem persistência: a escolha vale só para esta navegação.
+  }
+  aplicarIdiomaNoDocumento(lng);
+});
 
 export default i18n;

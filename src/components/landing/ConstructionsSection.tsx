@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { MapPin, Calendar, User } from 'lucide-react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { useTranslation } from 'react-i18next';
-import { fetchCollection, fetchSingle, getCmsImageUrl, resolveLocale } from '@/lib/cms';
-import { useRefetchOnFocus } from '@/hooks/useRefetchOnFocus';
+import { getCmsImageUrl, type CmsMedia } from '@/lib/cms';
+import { useCmsCollection, useCmsSingle } from '@/hooks/useCms';
 
 interface Obra {
   id: number;
@@ -28,7 +28,7 @@ type CmsConstructionAttributes = {
   deliveryForecast?: string;
   description?: string;
   type?: string;
-  image?: unknown;
+  image?: CmsMedia;
 };
 
 type CmsConstructionsPageAttributes = {
@@ -43,62 +43,35 @@ type CmsConstructionsPageAttributes = {
 const ObrasSection = () => {
   const { ref, isVisible } = useScrollAnimation();
   const [selected, setSelected] = useState<Obra | null>(null);
-  const { t, i18n } = useTranslation();
-  const refetchTick = useRefetchOnFocus();
-  const [cmsPage, setCmsPage] = useState<CmsConstructionsPageAttributes | null>(null);
-  const [obras, setObras] = useState<Obra[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
-  useEffect(() => {
-    let cancelled = false;
+  const { data: cmsPage } = useCmsSingle<CmsConstructionsPageAttributes>('constructions-page');
+  const {
+    data: items,
+    loading,
+    failed,
+  } = useCmsCollection<CmsConstructionAttributes>('constructions', {
+    populate: 'image',
+    sort: 'id:asc',
+  });
 
-    const load = async () => {
-      setLoading(true);
-      try {
-        const locale = resolveLocale(i18n.language);
-        const [page, items] = await Promise.all([
-          fetchSingle<CmsConstructionsPageAttributes>('constructions-page', { locale }),
-          fetchCollection<CmsConstructionAttributes>('constructions', {
-            locale,
-            populate: 'image',
-            sort: 'id:asc',
-          }),
-        ]);
-
-        if (cancelled) return;
-        setCmsPage(page);
-
-        const mapped = items
-          .map((entity) => {
-            const attrs = entity.attributes ?? {};
-            return {
-              id: entity.id,
-              nome: (attrs as any).name ?? '',
-              cidade: (attrs as any).city ?? '',
-              uf: (attrs as any).uf ?? '',
-              cliente: (attrs as any).client ?? '',
-              status: (attrs as any).situacao ?? '',
-              previsaoEntrega: (attrs as any).deliveryForecast ?? '',
-              descricao: (attrs as any).description ?? '',
-              tipo: (attrs as any).type ?? '',
-              imagem: getCmsImageUrl((attrs as any).image),
-            } satisfies Obra;
-          })
-          .filter((obra) => Boolean(obra.nome));
-
-        setObras(mapped);
-      } catch {
-        if (cancelled) return;
-        setCmsPage(null);
-        setObras([]);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-
-    load();
-    return () => { cancelled = true; };
-  }, [i18n.language, refetchTick]);
+  const obras: Obra[] = items
+    .map((entity) => {
+      const attrs = entity.attributes ?? {};
+      return {
+        id: entity.id,
+        nome: attrs.name ?? '',
+        cidade: attrs.city ?? '',
+        uf: attrs.uf ?? '',
+        cliente: attrs.client ?? '',
+        status: attrs.situacao ?? '',
+        previsaoEntrega: attrs.deliveryForecast ?? '',
+        descricao: attrs.description ?? '',
+        tipo: attrs.type ?? '',
+        imagem: getCmsImageUrl(attrs.image),
+      } satisfies Obra;
+    })
+    .filter((obra) => Boolean(obra.nome));
 
   const headerTitle1 = cmsPage?.title1 || t('constructions.title1');
   const headerTitle2 = cmsPage?.title2 || t('constructions.title2');
