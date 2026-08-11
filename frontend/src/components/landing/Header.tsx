@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import ehlLogo from '@/assets/Logo.png';
 import { fetchSingle, getCmsImageUrl, resolveLocale } from '@/lib/cms';
 import { useRefetchOnFocus } from '@/hooks/useRefetchOnFocus';
-import { useScrollDirection } from '@/hooks/useScrollDirection';
 
 type CmsGlobalConfig = {
   logo?: unknown;
@@ -23,7 +22,6 @@ const Header = () => {
   const { t, i18n } = useTranslation();
   const location = useLocation();
   const refetchTick = useRefetchOnFocus();
-  const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [cmsGlobal, setCmsGlobal] = useState<CmsGlobalConfig | null>(null);
@@ -61,12 +59,6 @@ const Header = () => {
     };
   }, [langOpen]);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
   // Trava scroll do body enquanto drawer está aberto
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
@@ -85,9 +77,6 @@ const Header = () => {
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, [mobileOpen]);
-
-  const scrollDirection = useScrollDirection();
-  const hidden = scrollDirection === 'down' && scrolled && !mobileOpen;
 
   const logoUrl = getCmsImageUrl(cmsGlobal?.logo) ?? null;
   const companyName = cmsGlobal?.companyName || 'Eletro Hidro Ltda.';
@@ -111,11 +100,8 @@ const Header = () => {
 
   return (
     <>
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 bg-background border-b border-border transition-transform duration-500 ${
-          hidden ? '-translate-y-full' : 'translate-y-0'
-        }`}
-      >
+      {/* Sempre visível: o header não se esconde ao rolar. */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
         <div className="container mx-auto flex items-center justify-between py-4 px-6">
           <Link to="/" className="flex items-center gap-3">
             <span
