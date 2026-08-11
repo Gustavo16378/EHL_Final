@@ -150,7 +150,7 @@ const Header = () => {
                 onClick={() => setLangOpen((v) => !v)}
                 aria-haspopup="menu"
                 aria-expanded={langOpen}
-                aria-label="Selecionar idioma"
+                aria-label={t('a11y.selectLanguage')}
                 className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Globe size={14} />
@@ -190,7 +190,7 @@ const Header = () => {
           <button
             className="lg:hidden text-foreground"
             onClick={() => setMobileOpen((v) => !v)}
-            aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
+            aria-label={mobileOpen ? t('a11y.closeMenu') : t('a11y.openMenu')}
           >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -211,7 +211,7 @@ const Header = () => {
         ref={drawerRef}
         role="dialog"
         aria-modal={mobileOpen}
-        aria-label="Menu de navegação"
+        aria-label={t('a11y.navMenu')}
         aria-hidden={!mobileOpen}
         className={`lg:hidden fixed top-0 right-0 h-full w-72 bg-background border-l border-border z-[52] transition-transform duration-300 ease-in-out flex flex-col ${
           mobileOpen ? 'translate-x-0' : 'translate-x-full'

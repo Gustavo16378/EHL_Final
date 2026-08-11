@@ -31,7 +31,6 @@ const resources = {
           rain: "Chuva",
           rainYes: "Sim",
           rainNo: "Não",
-          updatedAt: "Atualizado em",
           quotedAt: "Cotação de",
           today: "hoje",
           low: "mín",
@@ -277,11 +276,13 @@ const resources = {
           earthwork: "Terraplenagem",
           drainage: "Drenagem"
         },
-        rights: "© 2024 Eletro Hidro Ltda. Todos os direitos reservados."
+        rights: "© {{year}} Eletro Hidro Ltda. Todos os direitos reservados."
       },
       a11y: {
         openMenu: "Abrir menu",
         closeMenu: "Fechar menu",
+        navMenu: "Menu de navegação",
+        mapTitle: "EHL — Eletro Hidro no Google Maps",
         selectLanguage: "Selecionar idioma",
         heroImage: "Obra de infraestrutura executada pela EHL",
         companyImage: "Equipe e escritório da EHL",
@@ -318,7 +319,6 @@ const resources = {
           rain: "Rain",
           rainYes: "Yes",
           rainNo: "No",
-          updatedAt: "Updated at",
           quotedAt: "Quoted at",
           today: "today",
           low: "low",
@@ -566,11 +566,13 @@ const resources = {
           earthwork: "Earthworks",
           drainage: "Drainage"
         },
-        rights: "© 2024 Eletro Hidro Ltda. All rights reserved."
+        rights: "© {{year}} Eletro Hidro Ltda. All rights reserved."
       },
       a11y: {
         openMenu: "Open menu",
         closeMenu: "Close menu",
+        navMenu: "Navigation menu",
+        mapTitle: "EHL — Eletro Hidro on Google Maps",
         selectLanguage: "Select language",
         heroImage: "Infrastructure project delivered by EHL",
         companyImage: "EHL team and offices",
@@ -607,7 +609,6 @@ const resources = {
           rain: "Lluvia",
           rainYes: "Sí",
           rainNo: "No",
-          updatedAt: "Actualizado en",
           quotedAt: "Cotización de",
           today: "hoy",
           low: "mín",
@@ -853,11 +854,13 @@ const resources = {
           earthwork: "Movimiento de Tierras",
           drainage: "Drenaje"
         },
-        rights: "© 2024 Eletro Hidro Ltda. Todos los derechos reservados."
+        rights: "© {{year}} Eletro Hidro Ltda. Todos los derechos reservados."
       },
       a11y: {
         openMenu: "Abrir menú",
         closeMenu: "Cerrar menú",
+        navMenu: "Menú de navegación",
+        mapTitle: "EHL — Eletro Hidro en Google Maps",
         selectLanguage: "Seleccionar idioma",
         heroImage: "Obra de infraestructura ejecutada por EHL",
         companyImage: "Equipo y oficinas de EHL",

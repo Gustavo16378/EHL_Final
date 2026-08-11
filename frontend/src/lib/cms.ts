@@ -15,7 +15,6 @@ import equipMotoniveladora from '@/assets/equip-motoniveladora.jpg';
 import equipPaCarregadeira from '@/assets/equip-pa-carregadeira.jpg';
 import equipPavimentadora from '@/assets/equip-pavimentadora.jpg';
 import equipRoloCompactador from '@/assets/equip-rolo-compactador.jpg';
-import equipMachinery from '@/assets/equipment-machinery.jpg';
 import equipEscavadeira from '@/assets/equip-escavadeira.jpg';
 
 export const resolveLocale = (language: string | undefined) => {
@@ -42,7 +41,7 @@ type MockEntity<T> = { id: number; attributes: T };
 // ---------------------------------------------------------------------------
 // Equipamentos
 // ---------------------------------------------------------------------------
-const EQUIPAMENTOS: Record<string, MockEntity<Record<string, string>>[]> = {
+const EQUIPAMENTOS: Record<string, MockEntity<Record<string, unknown>>[]> = {
   pt: [
     { id: 1, attributes: { name: 'Escavadeiras Hidráulicas', description: 'Máquinas de alta performance para escavação de valas, fundações e movimentação de terra em grandes volumes. Frota com modelos de 20 a 50 toneladas.', amount: '12 unidades', category: 'Escavação', image: equipEscavadeira } },
     { id: 2, attributes: { name: 'Caminhões Basculantes', description: 'Frota de caminhões caçamba para transporte de terra, brita e materiais de construção. Capacidades de 14 m³ a 25 m³.', amount: '28 unidades', category: 'Transporte', image: equipCaminhao } },
@@ -72,7 +71,7 @@ const EQUIPAMENTOS: Record<string, MockEntity<Record<string, string>>[]> = {
 // ---------------------------------------------------------------------------
 // Obras em andamento
 // ---------------------------------------------------------------------------
-const OBRAS: Record<string, MockEntity<Record<string, string>>[]> = {
+const OBRAS: Record<string, MockEntity<Record<string, unknown>>[]> = {
   pt: [
     { id: 1, attributes: { name: 'Consórcio Pontes — Ponte Gov. Siqueira Campos', city: 'Palmas', uf: 'TO', client: 'Governo do Estado do Tocantins', situacao: 'Em andamento', deliveryForecast: 'Dez/2026', description: 'Duplicação e restauração da Ponte Governador José Wilson Siqueira Campos (TO-080), uma das principais obras de arte especiais do Tocantins, conectando Palmas ao Plano Diretor Norte sobre o Lago de Palmas.', type: 'Obras de Arte Especiais', image: obraConsorcioPontes } },
     { id: 2, attributes: { name: 'Avenida NS-15 — Palmas', city: 'Palmas', uf: 'TO', client: 'Prefeitura de Palmas', situacao: 'Em andamento', deliveryForecast: 'Set/2026', description: 'Execução de obras de infraestrutura urbana na Avenida NS-15 em Palmas-TO, contemplando terraplenagem, drenagem pluvial, pavimentação asfáltica e sinalização viária em trecho estratégico da capital tocantinense.', type: 'Infraestrutura Urbana', image: obraNS15 } },
@@ -555,8 +554,8 @@ export const getHeroSlides = (locale: string): HeroSlide[] =>
   HERO_SLIDES[locale] ?? HERO_SLIDES.pt;
 
 const COLLECTIONS: Record<string, Record<string, MockEntity<Record<string, unknown>>[]>> = {
-  equipments: EQUIPAMENTOS as any,
-  constructions: OBRAS as any,
+  equipments: EQUIPAMENTOS,
+  constructions: OBRAS,
   'portfolio-projects': PORTFOLIO,
 };
 

@@ -62,19 +62,21 @@ const PortfolioSection = () => {
 
         const mapped = items
           .map((entity) => {
-            const attrs = entity.attributes ?? {};
-            const rawDetails = (attrs as any).details;
+            // Anotar o tipo aqui é o que dispensa os casts: sem isto o `?? {}`
+            // alarga `attrs` e o acesso aos campos deixa de compilar.
+            const attrs: CmsPortfolioProjectAttributes = entity.attributes ?? {};
+            const rawDetails = attrs.details;
             const details = Array.isArray(rawDetails)
-              ? rawDetails.filter((d) => typeof d === 'string' && d.trim().length)
+              ? rawDetails.filter((d): d is string => typeof d === 'string' && d.trim().length > 0)
               : [];
 
             return {
               id: entity.id,
-              image: getCmsImageUrl((attrs as any).image),
-              title: (attrs as any).title ?? '',
-              category: (attrs as any).category ?? '',
-              location: (attrs as any).location ?? '',
-              description: (attrs as any).description ?? '',
+              image: getCmsImageUrl(attrs.image),
+              title: attrs.title ?? '',
+              category: attrs.category ?? '',
+              location: attrs.location ?? '',
+              description: attrs.description ?? '',
               details,
             } satisfies Project;
           })

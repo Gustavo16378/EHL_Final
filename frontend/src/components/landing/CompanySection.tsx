@@ -19,7 +19,7 @@ type CmsCompanyPageAttributes = {
   deliveredValue?: string;
   levelValue?: string;
   collaboratorsValue?: string;
-  companyImage?: any[];
+  companyImage?: unknown[];
 };
 
 
