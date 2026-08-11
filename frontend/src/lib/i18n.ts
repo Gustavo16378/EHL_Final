@@ -274,6 +274,14 @@ const resources = {
           drainage: "Drenagem"
         },
         rights: "© 2024 Eletro Hidro Ltda. Todos os direitos reservados."
+      },
+      a11y: {
+        openMenu: "Abrir menu",
+        closeMenu: "Fechar menu",
+        selectLanguage: "Selecionar idioma",
+        heroImage: "Obra de infraestrutura executada pela EHL",
+        companyImage: "Equipe e escritório da EHL",
+        equipmentsImage: "Frota de máquinas pesadas da EHL"
       }
     }
   },
@@ -551,6 +559,14 @@ const resources = {
           drainage: "Drainage"
         },
         rights: "© 2024 Eletro Hidro Ltda. All rights reserved."
+      },
+      a11y: {
+        openMenu: "Open menu",
+        closeMenu: "Close menu",
+        selectLanguage: "Select language",
+        heroImage: "Infrastructure project delivered by EHL",
+        companyImage: "EHL team and offices",
+        equipmentsImage: "EHL heavy machinery fleet"
       }
     }
   },
@@ -826,6 +842,14 @@ const resources = {
           drainage: "Drenaje"
         },
         rights: "© 2024 Eletro Hidro Ltda. Todos los derechos reservados."
+      },
+      a11y: {
+        openMenu: "Abrir menú",
+        closeMenu: "Cerrar menú",
+        selectLanguage: "Seleccionar idioma",
+        heroImage: "Obra de infraestructura ejecutada por EHL",
+        companyImage: "Equipo y oficinas de EHL",
+        equipmentsImage: "Flota de maquinaria pesada de EHL"
       }
     }
   }

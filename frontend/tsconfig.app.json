@@ -3,6 +3,10 @@
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
+    // src/main.jsx e src/App.jsx são JS: sem allowJs eles ficavam de fora do
+    // typecheck (e os imports .tsx a partir deles não eram verificados).
+    "allowJs": true,
+    "checkJs": false,
     "lib": [
       "ES2020",
       "DOM",
@@ -30,6 +34,7 @@
     "useDefineForClassFields": true
   },
   "include": [
-    "src"
+    "src",
+    "env.d.ts"
   ]
 }
