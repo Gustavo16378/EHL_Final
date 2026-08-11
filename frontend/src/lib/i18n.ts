@@ -26,15 +26,18 @@ const resources = {
           video: "Vídeo",
           videoTitle: "Vídeo institucional",
           videoUnavailable: "Vídeo indisponível.",
-          weather: "Tempo agora",
+          weather: "Tempo em Palmas/TO",
           todayRange: "Hoje",
           rain: "Chuva",
           rainYes: "Sim",
           rainNo: "Não",
-          updatedAt: "Atualizado em",
+          quotedAt: "Cotação de",
+          today: "hoje",
+          low: "mín",
+          high: "máx",
+          sessions: "{{n}} pregões",
           loading: "Carregando…",
           usdError: "Não foi possível carregar a cotação agora.",
-          weatherNoLocation: "Permita a localização para ver o clima.",
           weatherError: "Não foi possível carregar o clima agora.",
           exchange: "Câmbio",
           wind: "Vento",
@@ -273,7 +276,17 @@ const resources = {
           earthwork: "Terraplenagem",
           drainage: "Drenagem"
         },
-        rights: "© 2024 Eletro Hidro Ltda. Todos os direitos reservados."
+        rights: "© {{year}} Eletro Hidro Ltda. Todos os direitos reservados."
+      },
+      a11y: {
+        openMenu: "Abrir menu",
+        closeMenu: "Fechar menu",
+        navMenu: "Menu de navegação",
+        mapTitle: "EHL — Eletro Hidro no Google Maps",
+        selectLanguage: "Selecionar idioma",
+        heroImage: "Obra de infraestrutura executada pela EHL",
+        companyImage: "Equipe e escritório da EHL",
+        equipmentsImage: "Frota de máquinas pesadas da EHL"
       }
     }
   },
@@ -301,15 +314,18 @@ const resources = {
           video: "Video",
           videoTitle: "Institutional video",
           videoUnavailable: "Video unavailable.",
-          weather: "Weather now",
+          weather: "Weather in Palmas/TO",
           todayRange: "Today",
           rain: "Rain",
           rainYes: "Yes",
           rainNo: "No",
-          updatedAt: "Updated at",
+          quotedAt: "Quoted at",
+          today: "today",
+          low: "low",
+          high: "high",
+          sessions: "{{n}} sessions",
           loading: "Loading…",
           usdError: "Couldn't load the exchange rate right now.",
-          weatherNoLocation: "Allow location access to see weather.",
           weatherError: "Couldn't load the weather right now.",
           exchange: "Exchange",
           wind: "Wind",
@@ -550,7 +566,17 @@ const resources = {
           earthwork: "Earthworks",
           drainage: "Drainage"
         },
-        rights: "© 2024 Eletro Hidro Ltda. All rights reserved."
+        rights: "© {{year}} Eletro Hidro Ltda. All rights reserved."
+      },
+      a11y: {
+        openMenu: "Open menu",
+        closeMenu: "Close menu",
+        navMenu: "Navigation menu",
+        mapTitle: "EHL — Eletro Hidro on Google Maps",
+        selectLanguage: "Select language",
+        heroImage: "Infrastructure project delivered by EHL",
+        companyImage: "EHL team and offices",
+        equipmentsImage: "EHL heavy machinery fleet"
       }
     }
   },
@@ -578,15 +604,18 @@ const resources = {
           video: "Video",
           videoTitle: "Video institucional",
           videoUnavailable: "Video no disponible.",
-          weather: "Tiempo ahora",
+          weather: "Tiempo en Palmas/TO",
           todayRange: "Hoy",
           rain: "Lluvia",
           rainYes: "Sí",
           rainNo: "No",
-          updatedAt: "Actualizado en",
+          quotedAt: "Cotización de",
+          today: "hoy",
+          low: "mín",
+          high: "máx",
+          sessions: "{{n}} sesiones",
           loading: "Cargando…",
           usdError: "No se pudo cargar la cotización ahora.",
-          weatherNoLocation: "Permite la ubicación para ver el clima.",
           weatherError: "No se pudo cargar el clima ahora.",
           exchange: "Cambio",
           wind: "Viento",
@@ -825,7 +854,17 @@ const resources = {
           earthwork: "Movimiento de Tierras",
           drainage: "Drenaje"
         },
-        rights: "© 2024 Eletro Hidro Ltda. Todos los derechos reservados."
+        rights: "© {{year}} Eletro Hidro Ltda. Todos los derechos reservados."
+      },
+      a11y: {
+        openMenu: "Abrir menú",
+        closeMenu: "Cerrar menú",
+        navMenu: "Menú de navegación",
+        mapTitle: "EHL — Eletro Hidro en Google Maps",
+        selectLanguage: "Seleccionar idioma",
+        heroImage: "Obra de infraestructura ejecutada por EHL",
+        companyImage: "Equipo y oficinas de EHL",
+        equipmentsImage: "Flota de maquinaria pesada de EHL"
       }
     }
   }

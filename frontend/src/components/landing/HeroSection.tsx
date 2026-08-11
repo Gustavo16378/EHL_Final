@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback, type PointerEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { DollarSign, CloudSun, PlaySquare, ArrowRight, MapPin, Wind } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { fetchCollection, resolveLocale, getHeroSlides, type HeroSlide } from '@/lib/cms';
 import { useRefetchOnFocus } from '@/hooks/useRefetchOnFocus';
 
@@ -24,11 +25,21 @@ type ConstructionCard = {
   deliveryForecast: string;
 };
 
-type ExchangeRate = { bid: number; pct: number; history: number[] };
+type HistoryPoint = { t: number; v: number };
+type ExchangeRate = { bid: number; pct: number; history: HistoryPoint[] };
 type ExchangeState =
   | { status: 'idle' | 'loading' }
-  | { status: 'ready'; usd: ExchangeRate; eur: ExchangeRate; updatedAt: Date }
+  // quotedAt é o horário da própria cotação (timestamp da API), não o do fetch.
+  | { status: 'ready'; usd: ExchangeRate; eur: ExchangeRate; quotedAt: Date }
   | { status: 'error' };
+
+// Alta/baixa do câmbio. Par escolhido pelo validador de paleta: sob deuteranopia
+// o verde/vermelho padrão (emerald-400/red-400) separa só ΔE 6.5; este separa 7.5
+// e, ao contrário do rose-500 (ΔE 14 mas contraste 3.9), ainda passa como texto
+// sobre o card — 8.25:1 e 5.34:1. A cor nunca é o único sinal: a seta e o número
+// com sinal carregam a direção sozinhos.
+const TREND_UP = '#4ade80';
+const TREND_DOWN = '#fb7185';
 
 type ForecastDay = { weekday: string; max: number; rainProb: number; emoji: string };
 type WeatherState =
@@ -48,7 +59,12 @@ type WeatherState =
       forecast: ForecastDay[];
       updatedAt: Date;
     }
-  | { status: 'error' | 'no-location' };
+  | { status: 'error' };
+
+// Sede da EHL — Palmas/TO. O clima exibido é o da praça onde a empresa opera,
+// não o de quem visita: é informação institucional, e não depende de o
+// navegador conceder (ou negar) permissão de localização.
+const PALMAS_TO = { latitude: -10.1842, longitude: -48.3339 } as const;
 
 const getYouTubeVideoId = (url: string) => {
   try {
@@ -93,6 +109,7 @@ const HeroSection = () => {
   const refetchTick = useRefetchOnFocus();
 
   const locale = resolveLocale(i18n.language);
+  const localeTag = LOCALE_TAGS[locale] ?? 'pt-BR';
   const slides = useMemo<HeroSlide[]>(() => getHeroSlides(locale), [locale]);
 
   const [current, setCurrent] = useState(0);
@@ -102,7 +119,6 @@ const HeroSection = () => {
   const [constructionsLoading, setConstructionsLoading] = useState(true);
 
   const [exchange, setExchange] = useState<ExchangeState>({ status: 'idle' });
-  const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [weather, setWeather] = useState<WeatherState>({ status: 'idle' });
 
   const youtubeVideoId = useMemo(() => getYouTubeVideoId(VIDEO_URL), []);
@@ -188,14 +204,18 @@ const HeroSection = () => {
     const abortController = new AbortController();
     const opts: RequestInit = { signal: abortController.signal, cache: 'no-store' };
 
-    // Extrai os fechamentos (bid) do endpoint /daily, do mais antigo p/ o mais novo.
+    // Extrai os fechamentos (bid + data) do endpoint /daily, do mais antigo p/ o mais novo.
+    // A data vem junto porque o gráfico rotula o período e mostra o ponto no hover.
     // Histórico é best-effort: se falhar, o card continua mostrando a cotação sem gráfico.
-    const parseHistory = async (settled: PromiseSettledResult<Response>): Promise<number[]> => {
+    const parseHistory = async (settled: PromiseSettledResult<Response>): Promise<HistoryPoint[]> => {
       if (settled.status !== 'fulfilled' || !settled.value.ok) return [];
       try {
         const arr = await settled.value.json();
         if (!Array.isArray(arr)) return [];
-        return arr.map((x) => Number(x?.bid)).filter(Number.isFinite).reverse();
+        return arr
+          .map((x) => ({ t: Number(x?.timestamp) * 1000, v: Number(x?.bid) }))
+          .filter((p) => Number.isFinite(p.t) && Number.isFinite(p.v))
+          .reverse();
       } catch {
         return [];
       }
@@ -217,12 +237,16 @@ const HeroSection = () => {
         const eurPct = Number(data?.EURBRL?.pctChange);
         if (![usdBid, usdPct, eurBid, eurPct].every(Number.isFinite)) throw new Error('exchange-shape');
         const [usdHistory, eurHistory] = await Promise.all([parseHistory(usdHist), parseHistory(eurHist)]);
+        // O timestamp da API é o momento da cotação; cair no relógio local só
+        // acontece se a API omitir o campo. Mostrar a hora do fetch como se
+        // fosse a da cotação seria enganoso num mercado fechado no fim de semana.
+        const quotedTs = Number(data?.USDBRL?.timestamp) * 1000;
         if (!isMounted) return;
         setExchange({
           status: 'ready',
           usd: { bid: usdBid, pct: usdPct, history: usdHistory },
           eur: { bid: eurBid, pct: eurPct, history: eurHistory },
-          updatedAt: new Date(),
+          quotedAt: Number.isFinite(quotedTs) && quotedTs > 0 ? new Date(quotedTs) : new Date(),
         });
       } catch {
         if (!isMounted) return;
@@ -234,30 +258,16 @@ const HeroSection = () => {
     return () => { isMounted = false; abortController.abort(); window.clearInterval(id); };
   }, []);
 
-  // --- Geolocalização ---
+  // --- Clima de Palmas/TO (com vento e previsão de 2 dias) ---
   useEffect(() => {
-    if (!navigator.geolocation) {
-      setWeather({ status: 'no-location' });
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => setCoords({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
-      () => setWeather({ status: 'no-location' }),
-      { enableHighAccuracy: false, timeout: 10_000, maximumAge: 30 * 60 * 1000 },
-    );
-  }, []);
-
-  // --- Clima (com vento e previsão de 2 dias) ---
-  useEffect(() => {
-    if (!coords) return;
     let isMounted = true;
     const abortController = new AbortController();
     const fetchWeather = async () => {
       setWeather((prev) => (prev.status === 'ready' ? prev : { status: 'loading' }));
       try {
         const url = new URL('https://api.open-meteo.com/v1/forecast');
-        url.searchParams.set('latitude', String(coords.latitude));
-        url.searchParams.set('longitude', String(coords.longitude));
+        url.searchParams.set('latitude', String(PALMAS_TO.latitude));
+        url.searchParams.set('longitude', String(PALMAS_TO.longitude));
         url.searchParams.set('current', 'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m');
         url.searchParams.set('daily', 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum');
         url.searchParams.set('timezone', 'auto');
@@ -321,7 +331,7 @@ const HeroSection = () => {
     fetchWeather();
     const id = window.setInterval(fetchWeather, 10 * 60 * 1000);
     return () => { isMounted = false; abortController.abort(); window.clearInterval(id); };
-  }, [coords, locale]);
+  }, [locale]);
 
   const activeSlide = slides[current] ?? slides[0];
 
@@ -479,27 +489,16 @@ const HeroSection = () => {
                   <span className="text-xs font-medium tracking-wide uppercase">{t('hero.widgets.exchange')}</span>
                 </div>
                 {exchange.status === 'ready' ? (
-                  <div className="space-y-3">
-                    <div>
-                      <div className="flex items-baseline justify-between gap-2">
-                        <p className="text-xl font-light text-foreground leading-none">
-                          1 USD = {exchange.usd.bid.toFixed(2)} BRL
-                        </p>
-                        <VariationBadge pct={exchange.usd.pct} />
-                      </div>
-                      <Sparkline data={exchange.usd.history} />
-                    </div>
-                    <div className="border-t border-border/60 pt-3">
-                      <div className="flex items-baseline justify-between gap-2">
-                        <p className="text-xl font-light text-foreground leading-none">
-                          1 EUR = {exchange.eur.bid.toFixed(2)} BRL
-                        </p>
-                        <VariationBadge pct={exchange.eur.pct} />
-                      </div>
-                      <Sparkline data={exchange.eur.history} />
+                  <div className="space-y-4">
+                    <RateBlock code="USD" rate={exchange.usd} localeTag={localeTag} t={t} />
+                    <div className="border-t border-border/60 pt-4">
+                      <RateBlock code="EUR" rate={exchange.eur} localeTag={localeTag} t={t} />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {t('hero.widgets.updatedAt')}: {exchange.updatedAt.toLocaleString()}
+                      {t('hero.widgets.quotedAt')}:{' '}
+                      {exchange.quotedAt.toLocaleString(localeTag, {
+                        day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+                      })}
                     </p>
                   </div>
                 ) : exchange.status === 'error' ? (
@@ -560,8 +559,6 @@ const HeroSection = () => {
                       </div>
                     )}
                   </>
-                ) : weather.status === 'no-location' ? (
-                  <p className="text-sm text-silver font-light">{t('hero.widgets.weatherNoLocation')}</p>
                 ) : weather.status === 'error' ? (
                   <p className="text-sm text-silver font-light">{t('hero.widgets.weatherError')}</p>
                 ) : (
@@ -576,46 +573,164 @@ const HeroSection = () => {
   );
 };
 
-const VariationBadge = ({ pct }: { pct: number }) => {
-  const dir = pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat';
-  const color = dir === 'up' ? 'text-emerald-400' : dir === 'down' ? 'text-red-400' : 'text-muted-foreground';
-  const symbol = dir === 'up' ? '▲' : dir === 'down' ? '▼' : '▪';
+// Um bloco de moeda: código, cotação, variação do dia, tendência e a escala do
+// período. A escala é o que faltava — sem mín/máx o gráfico é um traço bonito
+// que não diz se a oscilação foi de centavos ou de reais.
+const RateBlock = ({
+  code,
+  rate,
+  localeTag,
+  t,
+}: {
+  code: string;
+  rate: ExchangeRate;
+  localeTag: string;
+  t: TFunction;
+}) => {
+  const money = (v: number) =>
+    v.toLocaleString(localeTag, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const values = rate.history.map((p) => p.v);
+
   return (
-    <span className={`inline-flex items-center gap-0.5 text-sm font-medium ${color}`}>
-      {symbol} {Math.abs(pct).toFixed(2)}%
+    <div>
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {code} · BRL
+        </span>
+        <VariationBadge pct={rate.pct} periodLabel={t('hero.widgets.today')} />
+      </div>
+
+      <p className="mt-1 text-2xl font-light leading-none text-foreground">R$ {money(rate.bid)}</p>
+
+      <Sparkline data={rate.history} localeTag={localeTag} />
+
+      {values.length >= 2 && (
+        <div className="mt-1.5 flex items-baseline justify-between gap-2 text-xs text-muted-foreground">
+          <span className="tabular-nums">
+            {t('hero.widgets.low')} {money(Math.min(...values))} · {t('hero.widgets.high')}{' '}
+            {money(Math.max(...values))}
+          </span>
+          <span>{t('hero.widgets.sessions', { n: values.length })}</span>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const VariationBadge = ({ pct, periodLabel }: { pct: number; periodLabel: string }) => {
+  // Abaixo de 0,005% o número arredonda para "0,00": desenhar seta aqui fazia o
+  // card exibir "▼ 0,00%", que se contradiz. Nesse caso a variação é plana.
+  const flat = !Number.isFinite(pct) || Math.abs(pct) < 0.005;
+  const dir = flat ? 'flat' : pct > 0 ? 'up' : 'down';
+  const color = dir === 'up' ? TREND_UP : dir === 'down' ? TREND_DOWN : undefined;
+  const symbol = dir === 'up' ? '▲' : dir === 'down' ? '▼' : '▪';
+  const sign = dir === 'up' ? '+' : dir === 'down' ? '−' : '';
+  const tone = color ? undefined : 'text-muted-foreground';
+
+  return (
+    <span className="inline-flex items-baseline gap-1">
+      <span aria-hidden="true" className={`text-xs ${tone ?? ''}`} style={color ? { color } : undefined}>
+        {symbol}
+      </span>
+      <span className={`text-sm font-medium tabular-nums ${tone ?? ''}`} style={color ? { color } : undefined}>
+        {sign}
+        {Math.abs(Number.isFinite(pct) ? pct : 0).toFixed(2)}%
+      </span>
+      <span className="text-xs text-muted-foreground">{periodLabel}</span>
     </span>
   );
 };
 
-// Mini-gráfico (sparkline) em SVG puro — mostra a tendência do câmbio nos últimos dias.
-// Cor verde se o período fechou em alta, vermelha se em baixa.
-const Sparkline = ({ data }: { data: number[] }) => {
-  if (!data || data.length < 2) return null;
-  const w = 100;
-  const h = 28;
-  const min = Math.min(...data);
-  const max = Math.max(...data);
+// Mini-gráfico (sparkline) em SVG puro — tendência do câmbio no período.
+// Verde se o período fechou acima de onde abriu, vermelho se abaixo.
+//
+// O traço usa preserveAspectRatio="none" para esticar na largura do card, o que
+// deformaria qualquer círculo desenhado dentro do SVG. Por isso o ponto final e
+// o do hover são <span> posicionados por porcentagem, fora do sistema de
+// coordenadas do SVG — ficam redondos em qualquer largura.
+const Sparkline = ({ data, localeTag }: { data: HistoryPoint[]; localeTag: string }) => {
+  const [hover, setHover] = useState<number | null>(null);
+  if (data.length < 2) return null;
+
+  const H = 36;
+  const PAD = 3; // respiro p/ o traço de 2px não encostar nas bordas
+  const values = data.map((p) => p.v);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
   const range = max - min || 1;
-  const points = data.map((v, i) => {
-    const x = (i / (data.length - 1)) * w;
-    const y = h - 1 - ((v - min) / range) * (h - 2); // 1px de respiro topo/base
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  });
-  const up = data[data.length - 1] >= data[0];
-  const color = up ? '#34d399' : '#f87171'; // emerald-400 / red-400
+
+  const xPct = (i: number) => (i / (data.length - 1)) * 100;
+  const yUnits = (v: number) => PAD + (1 - (v - min) / range) * (H - PAD * 2);
+  const yPct = (v: number) => (yUnits(v) / H) * 100;
+
+  const pts = data.map((p, i) => `${xPct(i).toFixed(2)},${yUnits(p.v).toFixed(2)}`).join(' ');
+  const up = values[values.length - 1] >= values[0];
+  const color = up ? TREND_UP : TREND_DOWN;
+  const active = hover ?? data.length - 1;
+
+  const track = (e: PointerEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (rect.width <= 0) return;
+    const frac = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+    setHover(Math.round(frac * (data.length - 1)));
+  };
+
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="mt-2 w-full h-7" aria-hidden="true">
-      <polygon points={`0,${h} ${points.join(' ')} ${w},${h}`} fill={color} opacity={0.12} />
-      <polyline
-        points={points.join(' ')}
-        fill="none"
-        stroke={color}
-        strokeWidth={1.5}
-        strokeLinejoin="round"
-        strokeLinecap="round"
-        vectorEffect="non-scaling-stroke"
+    <div
+      className="relative mt-2 touch-none"
+      onPointerMove={track}
+      onPointerDown={track}
+      onPointerLeave={() => setHover(null)}
+      onPointerCancel={() => setHover(null)}
+    >
+      <svg viewBox={`0 0 100 ${H}`} preserveAspectRatio="none" className="block h-9 w-full" aria-hidden="true">
+        <polygon points={`0,${H} ${pts} 100,${H}`} fill={color} opacity={0.1} />
+        <polyline
+          points={pts}
+          fill="none"
+          stroke={color}
+          strokeWidth={2}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
+        />
+        {hover !== null && (
+          <line
+            x1={xPct(hover)}
+            x2={xPct(hover)}
+            y1={0}
+            y2={H}
+            stroke="hsl(var(--muted-foreground))"
+            strokeWidth={1}
+            opacity={0.5}
+            vectorEffect="non-scaling-stroke"
+          />
+        )}
+      </svg>
+
+      {/* Anel na cor do card p/ o ponto continuar legível sobre o traço. */}
+      <span
+        className="pointer-events-none absolute block h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+        style={{
+          left: `${xPct(active)}%`,
+          top: `${yPct(values[active])}%`,
+          backgroundColor: color,
+          boxShadow: '0 0 0 2px hsl(var(--card))',
+        }}
       />
-    </svg>
+
+      {hover !== null && (
+        <div
+          className="pointer-events-none absolute -top-1 z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded border border-border/70 bg-card px-1.5 py-0.5 text-xs tabular-nums text-silver shadow-lg"
+          // Preso entre 12% e 88% p/ a caixa não vazar a borda do card nas pontas.
+          style={{ left: `${Math.min(88, Math.max(12, xPct(hover)))}%` }}
+        >
+          {new Date(data[hover].t).toLocaleDateString(localeTag, { day: '2-digit', month: '2-digit' })}
+          {' · R$ '}
+          {values[hover].toLocaleString(localeTag, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </div>
+      )}
+    </div>
   );
 };
 

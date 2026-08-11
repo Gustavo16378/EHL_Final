@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Caches de build (tsc -b e vite)
+*.tsbuildinfo
+.vite/
+
 # Strapi CMS (repo separado)
 backend/
 

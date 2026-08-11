@@ -158,7 +158,7 @@ const ContactSection = () => {
               allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              title="EHL — Eletro Hidro no Google Maps"
+              title={t('a11y.mapTitle')}
             />
           </div>
         </div>

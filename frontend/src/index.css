@@ -29,8 +29,23 @@
 }
 
 @layer base {
+  /* Texto do site inteiro era pequeno demais em notebook. Subir a base do html
+     escala tudo que está em rem — texto, padding, gap — de uma vez, sem tocar
+     em componente nenhum.
+     Fica em 17px até 1279px: a 18px a navbar desktop (logo + nome + 5 links +
+     idioma + botão) não cabe na largura de 1024px e estoura. */
+  html {
+    font-size: 106.25%; /* 17px */
+  }
+
+  @media (min-width: 1280px) {
+    html {
+      font-size: 112.5%; /* 18px */
+    }
+  }
+
   body {
-    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    font-family: 'Barlow', ui-sans-serif, system-ui, sans-serif;
   }
 
   h1, h2, h3, h4 {

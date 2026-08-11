@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import ehlLogo from '@/assets/Logo.png';
 import { fetchSingle, getCmsImageUrl, resolveLocale } from '@/lib/cms';
 import { useRefetchOnFocus } from '@/hooks/useRefetchOnFocus';
-import { useScrollDirection } from '@/hooks/useScrollDirection';
 
 type CmsGlobalConfig = {
   logo?: unknown;
@@ -23,7 +22,6 @@ const Header = () => {
   const { t, i18n } = useTranslation();
   const location = useLocation();
   const refetchTick = useRefetchOnFocus();
-  const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [cmsGlobal, setCmsGlobal] = useState<CmsGlobalConfig | null>(null);
@@ -61,12 +59,6 @@ const Header = () => {
     };
   }, [langOpen]);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
   // Trava scroll do body enquanto drawer está aberto
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
@@ -85,9 +77,6 @@ const Header = () => {
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, [mobileOpen]);
-
-  const scrollDirection = useScrollDirection();
-  const hidden = scrollDirection === 'down' && scrolled && !mobileOpen;
 
   const logoUrl = getCmsImageUrl(cmsGlobal?.logo) ?? null;
   const companyName = cmsGlobal?.companyName || 'Eletro Hidro Ltda.';
@@ -111,13 +100,13 @@ const Header = () => {
 
   return (
     <>
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 bg-background border-b border-border transition-transform duration-500 ${
-          hidden ? '-translate-y-full' : 'translate-y-0'
-        }`}
-      >
+      {/* Sempre visível: o header não se esconde ao rolar. */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
         <div className="container mx-auto flex items-center justify-between py-4 px-6">
-          <Link to="/" className="flex items-center gap-3">
+          {/* Laterais com flex-1 (larguras iguais) para o nav ficar centrado de
+              verdade. Com justify-between puro ele era empurrado ~60px à direita,
+              porque o bloco do logo é mais largo que o de ações. */}
+          <Link to="/" className="flex flex-1 min-w-0 items-center gap-3">
             <span
               className="logo-shine"
               style={{ '--logo-src': `url(${logoUrl ?? ehlLogo})` } as CSSProperties}
@@ -133,7 +122,7 @@ const Header = () => {
             </span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-8">
+          <nav className="hidden lg:flex shrink-0 items-center gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.to}
@@ -154,14 +143,14 @@ const Header = () => {
             ))}
           </nav>
 
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden lg:flex flex-1 items-center justify-end gap-4">
             {/* Language switcher — desktop */}
             <div ref={langRef} className="relative">
               <button
                 onClick={() => setLangOpen((v) => !v)}
                 aria-haspopup="menu"
                 aria-expanded={langOpen}
-                aria-label="Selecionar idioma"
+                aria-label={t('a11y.selectLanguage')}
                 className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Globe size={14} />
@@ -201,7 +190,7 @@ const Header = () => {
           <button
             className="lg:hidden text-foreground"
             onClick={() => setMobileOpen((v) => !v)}
-            aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
+            aria-label={mobileOpen ? t('a11y.closeMenu') : t('a11y.openMenu')}
           >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -222,7 +211,7 @@ const Header = () => {
         ref={drawerRef}
         role="dialog"
         aria-modal={mobileOpen}
-        aria-label="Menu de navegação"
+        aria-label={t('a11y.navMenu')}
         aria-hidden={!mobileOpen}
         className={`lg:hidden fixed top-0 right-0 h-full w-72 bg-background border-l border-border z-[52] transition-transform duration-300 ease-in-out flex flex-col ${
           mobileOpen ? 'translate-x-0' : 'translate-x-full'

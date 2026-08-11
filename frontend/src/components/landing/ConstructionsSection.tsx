@@ -70,18 +70,20 @@ const ObrasSection = () => {
 
         const mapped = items
           .map((entity) => {
-            const attrs = entity.attributes ?? {};
+            // Anotar o tipo aqui é o que dispensa os casts: sem isto o `?? {}`
+            // alarga `attrs` e o acesso aos campos deixa de compilar.
+            const attrs: CmsConstructionAttributes = entity.attributes ?? {};
             return {
               id: entity.id,
-              nome: (attrs as any).name ?? '',
-              cidade: (attrs as any).city ?? '',
-              uf: (attrs as any).uf ?? '',
-              cliente: (attrs as any).client ?? '',
-              status: (attrs as any).situacao ?? '',
-              previsaoEntrega: (attrs as any).deliveryForecast ?? '',
-              descricao: (attrs as any).description ?? '',
-              tipo: (attrs as any).type ?? '',
-              imagem: getCmsImageUrl((attrs as any).image),
+              nome: attrs.name ?? '',
+              cidade: attrs.city ?? '',
+              uf: attrs.uf ?? '',
+              cliente: attrs.client ?? '',
+              status: attrs.situacao ?? '',
+              previsaoEntrega: attrs.deliveryForecast ?? '',
+              descricao: attrs.description ?? '',
+              tipo: attrs.type ?? '',
+              imagem: getCmsImageUrl(attrs.image),
             } satisfies Obra;
           })
           .filter((obra) => Boolean(obra.nome));

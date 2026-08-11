@@ -59,14 +59,16 @@ const EquipamentsSection = () => {
 
         const mapped = items
           .map((entity) => {
-            const attrs = entity.attributes ?? {};
+            // Anotar o tipo aqui é o que dispensa os casts: sem isto o `?? {}`
+            // alarga `attrs` e o acesso aos campos deixa de compilar.
+            const attrs: CmsEquipmentAttributes = entity.attributes ?? {};
             return {
               id: entity.id,
-              nome: (attrs as any).name ?? '',
-              descricao: (attrs as any).description ?? '',
-              quantidade: (attrs as any).amount ?? '',
-              categoria: (attrs as any).category ?? '',
-              imagem: getCmsImageUrl((attrs as any).image),
+              nome: attrs.name ?? '',
+              descricao: attrs.description ?? '',
+              quantidade: attrs.amount ?? '',
+              categoria: attrs.category ?? '',
+              imagem: getCmsImageUrl(attrs.image),
             } satisfies Equipamento;
           })
           .filter((equip) => Boolean(equip.nome));
